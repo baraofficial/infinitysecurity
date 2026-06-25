@@ -27,13 +27,13 @@ function Splash() {
           className={`text-3xl sm:text-5xl md:text-6xl font-bold text-neon tracking-widest ${glitch ? "animate-pulse" : ""}`}
           style={{ textShadow: "0 0 20px var(--neon), 0 0 40px var(--neon-dim)" }}
         >
-          BARA OFFICIAL V1
+          DARKNESS AI
         </h1>
-        <p className="mt-4 text-xs sm:text-sm text-neon/80 tracking-[0.4em]">[ WIDE EDITION ]</p>
+        <p className="mt-4 text-xs sm:text-sm text-neon/80 tracking-[0.4em]">[ PREMIUM AI ]</p>
       </div>
       <div className="mt-10 flex items-center gap-2 text-[10px] sm:text-xs text-muted-foreground tracking-widest">
         <span className="h-1 w-1 rounded-full bg-neon animate-pulse" />
-        powered by bara official
+        powered by darkness ai
       </div>
     </div>
   );

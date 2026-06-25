@@ -65,9 +65,9 @@ function AuthPage() {
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
           <h1 className="text-xl text-neon tracking-[0.3em]" style={{ textShadow: "0 0 14px var(--neon)" }}>
-            BARA OFFICIAL V1
+            DARKNESS AI
           </h1>
-          <p className="text-[10px] text-muted-foreground tracking-widest mt-1">[ WIDE EDITION ]</p>
+          <p className="text-[10px] text-muted-foreground tracking-widest mt-1">[ PREMIUM AI ]</p>
         </div>
         <div className="rounded-xl border-2 border-neon bg-black p-6 sm:p-8" style={{ boxShadow: "var(--shadow-neon)" }}>
           <div className="flex gap-2 text-xs mb-6">
@@ -100,7 +100,7 @@ function AuthPage() {
               className="w-full bg-neon text-black font-bold tracking-widest py-3 mt-2 border-2 border-neon hover:bg-black hover:text-neon transition disabled:opacity-50"
               style={{ boxShadow: "var(--shadow-neon-sm)" }}
             >
-              {loading ? "// processing..." : tab === "register" ? "[ CREATE ACCOUNT ]" : "[ JACK IN ]"}
+              {loading ? "// processing..." : tab === "register" ? "[ CREATE ACCOUNT ]" : "[ SIGN IN ]"}
             </button>
           </form>
 
@@ -117,7 +117,7 @@ function AuthPage() {
           </div>
         </div>
         <p className="mt-6 text-center text-[10px] text-muted-foreground tracking-widest">
-          powered by bara official
+          powered by darkness ai
         </p>
         <div className="mt-2 text-center">
           <Link to="/" className="text-[10px] text-neon/60 hover:text-neon">&lt; back</Link>

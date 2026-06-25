@@ -55,7 +55,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "BARA OFFICIAL V1" },
+      { title: "DARKNESS AI" },
       { name: "description", content: "BARA Official V1 — Wide Edition. Cyberpunk AI chat." },
     ],
     links: [

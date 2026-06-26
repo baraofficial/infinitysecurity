@@ -159,9 +159,6 @@ function ChatPage() {
         style={{ boxShadow: sidebarOpen ? "var(--shadow-neon)" : undefined }}
       >
         <div className="p-4 border-b-2 border-neon/60">
-          <div className="text-[10px] tracking-[0.3em] text-neon" style={{ textShadow: "0 0 8px var(--neon)" }}>
-            BARA // {username}
-          </div>
           <button
             onClick={newChat}
             className="mt-3 w-full border border-neon px-3 py-2 text-xs tracking-widest hover:bg-neon hover:text-black transition flex items-center gap-2 justify-center"
@@ -245,7 +242,7 @@ function ChatPage() {
           {sending && (
             <div className="flex justify-start">
               <div className="border border-neon/40 px-4 py-3 text-sm text-neon/70">
-                <span className="inline-block animate-pulse">// processing</span>
+                <span className="inline-block animate-pulse">thinking</span>
                 <span className="ml-1 animate-pulse">▍</span>
               </div>
             </div>

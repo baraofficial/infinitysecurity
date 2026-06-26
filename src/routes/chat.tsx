@@ -22,7 +22,17 @@ function ChatPage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [attachOpen, setAttachOpen] = useState(false);
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    if (files.length) setAttachments((prev) => [...prev, ...files]);
+    e.target.value = "";
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {

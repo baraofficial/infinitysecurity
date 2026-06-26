@@ -340,6 +340,7 @@ function ChatPage() {
           </p>
         </form>
       </main>
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }

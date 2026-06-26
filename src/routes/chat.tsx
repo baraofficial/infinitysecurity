@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Send, LogOut, Menu, Trash2, MessageSquare } from "lucide-react";
+import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip } from "lucide-react";
 
 export const Route = createFileRoute("/chat")({
   ssr: false,
@@ -22,7 +22,17 @@ function ChatPage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [attachOpen, setAttachOpen] = useState(false);
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    if (files.length) setAttachments((prev) => [...prev, ...files]);
+    e.target.value = "";
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -207,12 +217,12 @@ function ChatPage() {
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
           {messages.length === 0 && !sending && (
-            <div className="h-full flex items-center justify-center text-center">
+            <div className="h-full flex items-center justify-center text-center px-4">
               <div>
-                <div className="text-2xl text-neon tracking-[0.3em]" style={{ textShadow: "0 0 14px var(--neon)" }}>
-                  &gt; READY
+                <div className="text-xl sm:text-2xl text-neon tracking-[0.2em]" style={{ textShadow: "0 0 14px var(--neon)" }}>
+                  Welcome to Darkness AI
                 </div>
-                <p className="mt-3 text-xs text-muted-foreground">// type a transmission below</p>
+                <p className="mt-3 text-xs text-neon/60 tracking-widest">by Bara Official</p>
               </div>
             </div>
           )}
@@ -246,25 +256,64 @@ function ChatPage() {
           onSubmit={(e) => { e.preventDefault(); send(); }}
           className="border-t-2 border-neon p-3 sm:p-4"
         >
-          <div className="flex items-center gap-2 border-2 border-neon bg-black px-2 py-1" style={{ boxShadow: "var(--shadow-neon-sm)" }}>
+          <div className="relative flex items-center gap-2 border-2 border-neon bg-black px-2 py-1" style={{ boxShadow: "var(--shadow-neon-sm)" }}>
+            {attachOpen && (
+              <div className="absolute bottom-full left-0 mb-2 w-44 border-2 border-neon bg-black z-10" style={{ boxShadow: "var(--shadow-neon)" }}>
+                <button
+                  type="button"
+                  onClick={() => { cameraRef.current?.click(); setAttachOpen(false); }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs tracking-widest text-neon hover:bg-neon hover:text-black transition"
+                >
+                  <Camera size={14} /> CAMERA
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { fileRef.current?.click(); setAttachOpen(false); }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs tracking-widest text-neon hover:bg-neon hover:text-black transition border-t border-neon/40"
+                >
+                  <Paperclip size={14} /> FILE
+                </button>
+              </div>
+            )}
+            <input
+              ref={cameraRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={onFiles}
+            />
+            <input
+              ref={fileRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={onFiles}
+            />
             <button
               type="button"
-              onClick={newChat}
+              onClick={() => setAttachOpen((v) => !v)}
               className="p-2 text-neon hover:bg-neon/10"
-              aria-label="new chat"
+              aria-label="attach"
             >
               <Plus size={18} />
             </button>
+            {attachments.length > 0 && (
+              <div className="flex items-center gap-1 text-[10px] text-neon/70">
+                {attachments.length} file{attachments.length > 1 ? "s" : ""}
+                <button type="button" onClick={() => setAttachments([])} className="text-neon/50 hover:text-neon ml-1">×</button>
+              </div>
+            )}
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="// transmit message..."
+              placeholder="type a message..."
               disabled={sending}
               className="flex-1 bg-transparent text-neon text-sm outline-none placeholder:text-neon/40 caret-neon py-2"
             />
             <button
               type="submit"
-              disabled={!input.trim() || sending}
+              disabled={(!input.trim() && attachments.length === 0) || sending}
               className="p-2 text-neon hover:bg-neon hover:text-black disabled:opacity-40 transition"
               aria-label="send"
             >

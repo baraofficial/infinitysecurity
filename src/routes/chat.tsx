@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip, Settings } from "lucide-react";
 import { RenderMessage } from "@/components/CodeBlock";
+import { SettingsModal } from "@/components/SettingsModal";
 
 export const Route = createFileRoute("/chat")({
   ssr: false,

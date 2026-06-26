@@ -246,25 +246,64 @@ function ChatPage() {
           onSubmit={(e) => { e.preventDefault(); send(); }}
           className="border-t-2 border-neon p-3 sm:p-4"
         >
-          <div className="flex items-center gap-2 border-2 border-neon bg-black px-2 py-1" style={{ boxShadow: "var(--shadow-neon-sm)" }}>
+          <div className="relative flex items-center gap-2 border-2 border-neon bg-black px-2 py-1" style={{ boxShadow: "var(--shadow-neon-sm)" }}>
+            {attachOpen && (
+              <div className="absolute bottom-full left-0 mb-2 w-44 border-2 border-neon bg-black z-10" style={{ boxShadow: "var(--shadow-neon)" }}>
+                <button
+                  type="button"
+                  onClick={() => { cameraRef.current?.click(); setAttachOpen(false); }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs tracking-widest text-neon hover:bg-neon hover:text-black transition"
+                >
+                  <Camera size={14} /> CAMERA
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { fileRef.current?.click(); setAttachOpen(false); }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs tracking-widest text-neon hover:bg-neon hover:text-black transition border-t border-neon/40"
+                >
+                  <Paperclip size={14} /> FILE
+                </button>
+              </div>
+            )}
+            <input
+              ref={cameraRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={onFiles}
+            />
+            <input
+              ref={fileRef}
+              type="file"
+              multiple
+              className="hidden"
+              onChange={onFiles}
+            />
             <button
               type="button"
-              onClick={newChat}
+              onClick={() => setAttachOpen((v) => !v)}
               className="p-2 text-neon hover:bg-neon/10"
-              aria-label="new chat"
+              aria-label="attach"
             >
               <Plus size={18} />
             </button>
+            {attachments.length > 0 && (
+              <div className="flex items-center gap-1 text-[10px] text-neon/70">
+                {attachments.length} file{attachments.length > 1 ? "s" : ""}
+                <button type="button" onClick={() => setAttachments([])} className="text-neon/50 hover:text-neon ml-1">×</button>
+              </div>
+            )}
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="// transmit message..."
+              placeholder="type a message..."
               disabled={sending}
               className="flex-1 bg-transparent text-neon text-sm outline-none placeholder:text-neon/40 caret-neon py-2"
             />
             <button
               type="submit"
-              disabled={!input.trim() || sending}
+              disabled={(!input.trim() && attachments.length === 0) || sending}
               className="p-2 text-neon hover:bg-neon hover:text-black disabled:opacity-40 transition"
               aria-label="send"
             >

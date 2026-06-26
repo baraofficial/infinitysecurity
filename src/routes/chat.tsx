@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip } from "lucide-react";
+import { RenderMessage } from "@/components/CodeBlock";
 
 export const Route = createFileRoute("/chat")({
   ssr: false,
@@ -226,7 +227,7 @@ function ChatPage() {
           {messages.map((m) => (
             <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[85%] sm:max-w-[70%] px-4 py-3 border text-sm whitespace-pre-wrap leading-relaxed ${
+                className={`max-w-[85%] sm:max-w-[70%] px-4 py-3 border text-sm leading-relaxed ${
                   m.role === "user"
                     ? "border-neon bg-neon/10 text-neon"
                     : "border-neon/40 bg-black text-neon/90"
@@ -235,7 +236,7 @@ function ChatPage() {
                 <div className="text-[9px] tracking-widest text-neon/60 mb-1">
                   {m.role === "user" ? `> ${username}` : "> bara"}
                 </div>
-                {m.content}
+                {m.role === "assistant" ? <RenderMessage content={m.content} /> : <span className="whitespace-pre-wrap">{m.content}</span>}
               </div>
             </div>
           ))}

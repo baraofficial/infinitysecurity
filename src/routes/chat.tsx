@@ -236,7 +236,7 @@ function ChatPage() {
                 <div className="text-[9px] tracking-widest text-neon/60 mb-1">
                   {m.role === "user" ? `> ${username}` : "> bara"}
                 </div>
-                {m.content}
+                {m.role === "assistant" ? <RenderMessage content={m.content} /> : <span className="whitespace-pre-wrap">{m.content}</span>}
               </div>
             </div>
           ))}

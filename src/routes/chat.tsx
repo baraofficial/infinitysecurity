@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip } from "lucide-react";
+import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip, Settings } from "lucide-react";
 import { RenderMessage } from "@/components/CodeBlock";
 
 export const Route = createFileRoute("/chat")({
@@ -192,8 +192,23 @@ function ChatPage() {
           ))}
         </div>
         <div className="p-3 border-t-2 border-neon/60">
-          <button onClick={signOut} className="w-full flex items-center justify-center gap-2 text-xs text-neon/70 hover:text-neon py-2 border border-neon/40 hover:border-neon">
-            <LogOut size={12} /> DISCONNECT
+          <button
+            onClick={() => alert("Open settings menu")}
+            aria-label="settings"
+            className="w-full flex items-center justify-center p-3 rounded-lg border transition"
+            style={{ borderColor: "#a855f733" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = "#a855f7";
+              e.currentTarget.style.backgroundColor = "#a855f722";
+              e.currentTarget.style.boxShadow = "0 0 12px #a855f766";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = "#a855f733";
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.boxShadow = "none";
+            }}
+          >
+            <Settings size={18} color="#a855f7" />
           </button>
         </div>
       </aside>

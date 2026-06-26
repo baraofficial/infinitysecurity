@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip } from "lucide-react";
+import { RenderMessage } from "@/components/CodeBlock";
 
 export const Route = createFileRoute("/chat")({
   ssr: false,

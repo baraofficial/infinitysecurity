@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Send, LogOut, Menu, Trash2, MessageSquare } from "lucide-react";
+import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip } from "lucide-react";
 
 export const Route = createFileRoute("/chat")({
   ssr: false,

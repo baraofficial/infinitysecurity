@@ -195,7 +195,7 @@ function ChatPage() {
         </div>
         <div className="p-3 border-t-2 border-neon/60">
           <button
-            onClick={() => alert("Open settings menu")}
+            onClick={() => setSettingsOpen(true)}
             aria-label="settings"
             className="w-full flex items-center justify-center p-3 rounded-lg border transition"
             style={{ borderColor: "#a855f733" }}

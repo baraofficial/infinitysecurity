@@ -36,6 +36,12 @@ function AuthPage() {
     setLoading(true);
     try {
       if (tab === "register") {
+        const existing: string[] = JSON.parse(localStorage.getItem("registeredUsers") || "[]");
+        if (existing.includes(username.trim())) {
+          toast.error("Username already in use. Use another username");
+          setLoading(false);
+          return;
+        }
         const { error } = await supabase.auth.signUp({
           email,
           password,
@@ -45,6 +51,8 @@ function AuthPage() {
           },
         });
         if (error) throw error;
+        localStorage.setItem("registeredUsers", JSON.stringify([...existing, username.trim()]));
+        localStorage.setItem("currentUser", username.trim());
         toast.success("// access granted");
         navigate({ to: "/chat" });
       } else {

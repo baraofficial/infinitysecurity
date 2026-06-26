@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip, Settings } from "lucide-react";
 import { RenderMessage } from "@/components/CodeBlock";
+import { SettingsModal } from "@/components/SettingsModal";
 
 export const Route = createFileRoute("/chat")({
   ssr: false,
@@ -25,6 +26,7 @@ function ChatPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [attachOpen, setAttachOpen] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const cameraRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -193,7 +195,7 @@ function ChatPage() {
         </div>
         <div className="p-3 border-t-2 border-neon/60">
           <button
-            onClick={() => alert("Open settings menu")}
+            onClick={() => setSettingsOpen(true)}
             aria-label="settings"
             className="w-full flex items-center justify-center p-3 rounded-lg border transition"
             style={{ borderColor: "#a855f733" }}
@@ -338,6 +340,7 @@ function ChatPage() {
           </p>
         </form>
       </main>
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }

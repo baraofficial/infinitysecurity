@@ -227,7 +227,7 @@ function ChatPage() {
           {messages.map((m) => (
             <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[85%] sm:max-w-[70%] px-4 py-3 border text-sm whitespace-pre-wrap leading-relaxed ${
+                className={`max-w-[85%] sm:max-w-[70%] px-4 py-3 border text-sm leading-relaxed ${
                   m.role === "user"
                     ? "border-neon bg-neon/10 text-neon"
                     : "border-neon/40 bg-black text-neon/90"

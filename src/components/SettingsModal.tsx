@@ -1,8 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import { X, Upload, LogOut, Trash2, Database, Save } from "lucide-react";
+import { X, Upload, LogOut, Trash2, Database, Save, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+
+type ThemeKey = "purple" | "green" | "blue";
+const THEMES: Record<ThemeKey, string> = {
+  purple: "#a855f7",
+  green: "#22c55e",
+  blue: "#3b82f6",
+};
+
+function applyTheme(t: ThemeKey) {
+  document.documentElement.style.setProperty("--accent-color", THEMES[t]);
+}
+
+type ConfirmCfg = { title?: string; action: () => void } | null;
 
 export function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const navigate = useNavigate();
@@ -11,18 +24,43 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
   const [photo, setPhoto] = useState<string>("");
   const [username, setUsername] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [theme, setTheme] = useState<ThemeKey>("purple");
+  const [saving, setSaving] = useState(false);
+  const [confirm, setConfirm] = useState<ConfirmCfg>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const accent = THEMES[theme];
 
   useEffect(() => {
     if (!open) return;
     const p = localStorage.getItem("profilePhoto") || "";
     const u = localStorage.getItem("currentUser") || "";
+    const t = (localStorage.getItem("theme") as ThemeKey) || "purple";
     setSavedPhoto(p); setPhoto(p);
     setSavedUsername(u); setUsername(u);
+    setTheme(THEMES[t] ? t : "purple");
     setError("");
+    setSaving(false);
+    setConfirm(null);
   }, [open]);
 
+  // apply theme globally on mount and on change
+  useEffect(() => {
+    const t = (localStorage.getItem("theme") as ThemeKey) || "purple";
+    if (THEMES[t]) applyTheme(t);
+  }, []);
+
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
+
   if (!open) return null;
+
+  function pickTheme(t: ThemeKey) {
+    setTheme(t);
+    localStorage.setItem("theme", t);
+    applyTheme(t);
+  }
 
   function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
@@ -40,40 +78,55 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
       let list: string[] = [];
       try { list = raw ? JSON.parse(raw) : []; } catch { list = []; }
       if (list.includes(trimmed)) { setError("Username is already in use"); return; }
-      list = list.filter((u) => u !== savedUsername);
-      list.push(trimmed);
-      localStorage.setItem("registeredUsers", JSON.stringify(list));
     }
-    localStorage.setItem("currentUser", trimmed);
-    if (photo) localStorage.setItem("profilePhoto", photo);
-    toast.success("Saved!", { duration: 1500 });
-    setTimeout(() => onClose(), 200);
+    setSaving(true);
+    setTimeout(() => {
+      if (trimmed !== savedUsername) {
+        const raw = localStorage.getItem("registeredUsers");
+        let list: string[] = [];
+        try { list = raw ? JSON.parse(raw) : []; } catch { list = []; }
+        list = list.filter((u) => u !== savedUsername);
+        list.push(trimmed);
+        localStorage.setItem("registeredUsers", JSON.stringify(list));
+      }
+      localStorage.setItem("currentUser", trimmed);
+      if (photo) localStorage.setItem("profilePhoto", photo);
+      toast.success("✓ Saved!", {
+        duration: 1500,
+        style: { background: "#0a0a0a", color: "#22c55e", border: "1px solid #22c55e" },
+      });
+      setSaving(false);
+      setTimeout(() => onClose(), 1500);
+    }, 500);
   }
 
   function handleCancel() {
+    if (saving) return;
     setPhoto(savedPhoto);
     setUsername(savedUsername);
     setError("");
     onClose();
   }
 
-  async function logOut() {
+  async function doLogOut() {
     localStorage.removeItem("currentUser");
     await supabase.auth.signOut();
     navigate({ to: "/auth" });
   }
-
-  function clearChat() {
+  function doClearChat() {
     localStorage.removeItem("chatHistory");
     window.location.reload();
   }
-
-  function clearCache() {
-    const keep = localStorage.getItem("registeredUsers");
+  function doClearCache() {
+    const users = localStorage.getItem("registeredUsers");
+    const th = localStorage.getItem("theme");
     localStorage.clear();
-    if (keep) localStorage.setItem("registeredUsers", keep);
+    if (users) localStorage.setItem("registeredUsers", users);
+    if (th) localStorage.setItem("theme", th);
     window.location.reload();
   }
+
+  const disabled = saving;
 
   return (
     <div
@@ -82,38 +135,42 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
       onClick={handleCancel}
     >
       <div
-        className="w-full max-w-sm rounded-xl p-6 font-mono text-neon relative"
-        style={{ background: "#111119", border: "2px solid #a855f7", boxShadow: "0 0 24px #a855f766" }}
+        className="w-full max-w-sm rounded-xl p-6 font-mono relative"
+        style={{ background: "#111119", border: `2px solid ${accent}`, boxShadow: `0 0 24px ${accent}66`, color: accent }}
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={handleCancel}
           aria-label="close"
-          className="absolute top-3 right-3 text-neon hover:opacity-70"
+          disabled={disabled}
+          className="absolute top-3 right-3 hover:opacity-70 disabled:opacity-40"
+          style={{ color: accent }}
         >
           <X size={18} />
         </button>
 
-        <h2 className="text-sm tracking-widest text-center mb-5" style={{ textShadow: "0 0 8px #a855f7" }}>
+        <h2 className="text-sm tracking-widest text-center mb-5" style={{ textShadow: `0 0 8px ${accent}` }}>
           SETTINGS
         </h2>
 
         <div className="flex flex-col items-center gap-2 mb-5">
           <div
             className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center"
-            style={{ border: "2px solid #a855f7", background: "#000" }}
+            style={{ border: `2px solid ${accent}`, background: "#000" }}
           >
             {photo ? (
               <img src={photo} alt="profile" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-[10px] text-neon/60">NO IMG</span>
+              <span className="text-[10px] opacity-60">NO IMG</span>
             )}
           </div>
-          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPick} />
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPick} disabled={disabled} />
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="flex items-center gap-1 text-[10px] tracking-widest px-3 py-1 border border-neon hover:bg-neon hover:text-black transition"
+            disabled={disabled}
+            className="flex items-center gap-1 text-[10px] tracking-widest px-3 py-1 transition disabled:opacity-40"
+            style={{ border: `1px solid ${accent}`, color: accent }}
           >
             <Upload size={12} /> UPLOAD PHOTO
           </button>
@@ -124,9 +181,11 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
           <input
             value={username}
             onChange={(e) => { setUsername(e.target.value); setError(""); }}
-            className="w-full bg-black border-2 border-neon/60 focus:border-neon px-3 py-2 text-neon outline-none text-sm caret-neon"
+            disabled={disabled}
+            className="w-full bg-black px-3 py-2 outline-none text-sm disabled:opacity-50"
+            style={{ border: `2px solid ${accent}99`, color: accent, caretColor: accent }}
           />
-          <span className="block text-[9px] text-neon/50 mt-1">Unique username</span>
+          <span className="block text-[9px] opacity-50 mt-1">Unique username</span>
         </label>
 
         {error && (
@@ -138,24 +197,60 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
           </div>
         )}
 
-        <div className="border-t border-neon/40 my-4" />
+        <div className="my-4" style={{ borderTop: `1px solid ${accent}66` }} />
+
+        {/* THEME SWITCHER */}
+        <div className="mb-4">
+          <span className="block text-[10px] tracking-widest mb-2">&gt; THEME</span>
+          <div className="flex gap-2">
+            {(Object.keys(THEMES) as ThemeKey[]).map((k) => {
+              const c = THEMES[k];
+              const active = theme === k;
+              return (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => pickTheme(k)}
+                  disabled={disabled}
+                  className="flex-1 text-[10px] tracking-widest py-2 rounded-lg transition disabled:opacity-40"
+                  style={{
+                    background: active ? `${c}33` : "transparent",
+                    border: `1px solid ${c}`,
+                    color: c,
+                    boxShadow: active ? `0 0 10px ${c}99` : "none",
+                  }}
+                >
+                  {k === "purple" ? "🟣 PURPLE" : k === "green" ? "🟢 GREEN" : "🔵 BLUE"}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="my-4" style={{ borderTop: `1px solid ${accent}66` }} />
 
         <div className="space-y-2">
           <button
-            onClick={logOut}
-            className="w-full flex items-center justify-center gap-2 py-2 border border-neon text-xs tracking-widest hover:bg-neon hover:text-black transition"
+            onClick={() => setConfirm({ action: doLogOut })}
+            disabled={disabled}
+            className="w-full flex items-center justify-center gap-2 py-2 text-xs tracking-widest transition disabled:opacity-40"
+            style={{ border: `1px solid ${accent}`, color: accent }}
           >
             <LogOut size={14} /> LOG OUT
           </button>
           <button
-            onClick={clearChat}
-            className="w-full flex items-center justify-center gap-2 py-2 border border-neon text-xs tracking-widest hover:bg-neon hover:text-black transition"
+            onClick={() => setConfirm({ action: doClearChat })}
+            disabled={disabled}
+            className="w-full flex items-center justify-center gap-2 py-2 text-xs tracking-widest transition disabled:opacity-40"
+            style={{ border: `1px solid ${accent}`, color: accent }}
           >
             <Trash2 size={14} /> CLEAR CHAT
           </button>
           <button
-            onClick={clearCache}
-            className="w-full flex items-center justify-center gap-2 py-2 border border-neon text-xs tracking-widest hover:bg-neon hover:text-black transition"
+            onClick={() => setConfirm({ action: doClearCache })}
+            disabled={disabled}
+            className="w-full flex items-center justify-center gap-2 py-2 text-xs tracking-widest transition disabled:opacity-40"
+            style={{ border: `1px solid ${accent}`, color: accent }}
           >
             <Database size={14} /> CLEAR CACHE
           </button>
@@ -164,40 +259,94 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
         <div className="flex gap-[10px] mt-4">
           <button
             onClick={handleCancel}
-            className="flex-1 text-xs tracking-widest font-bold transition"
+            disabled={disabled}
+            className="flex-1 text-xs tracking-widest font-bold transition disabled:opacity-40"
             style={{
               padding: "12px",
               borderRadius: "8px",
               background: "transparent",
-              border: "1px solid #a855f7",
-              color: "#a855f7",
+              border: `1px solid ${accent}`,
+              color: accent,
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "#a855f722"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
           >
             CANCEL
           </button>
           <button
             onClick={handleSave}
-            className="flex-1 flex items-center justify-center gap-2 text-xs tracking-widest font-bold transition"
+            disabled={disabled}
+            className="flex-1 flex items-center justify-center gap-2 text-xs tracking-widest font-bold transition disabled:opacity-60"
             style={{
               padding: "12px",
               borderRadius: "8px",
-              background: "#a855f7",
+              background: accent,
               color: "#000",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.filter = "brightness(1.2)";
-              e.currentTarget.style.boxShadow = "0 0 16px #a855f7";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.filter = "none";
-              e.currentTarget.style.boxShadow = "none";
+              boxShadow: `0 0 12px ${accent}88`,
             }}
           >
-            <Save size={14} /> SAVE
+            {saving ? (
+              <Loader2 size={16} className="animate-spin" style={{ color: "#000" }} />
+            ) : (
+              <>
+                <Save size={14} /> SAVE
+              </>
+            )}
           </button>
         </div>
+
+        {confirm && (
+          <div
+            className="absolute inset-0 z-10 flex items-center justify-center rounded-xl px-4"
+            style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }}
+            onClick={() => setConfirm(null)}
+          >
+            <div
+              className="w-full max-w-xs p-5 font-mono"
+              style={{
+                background: "#111119",
+                border: `2px solid ${accent}`,
+                borderRadius: "8px",
+                boxShadow: `0 0 16px ${accent}88`,
+                color: accent,
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-sm tracking-widest text-center mb-1" style={{ textShadow: `0 0 8px ${accent}` }}>
+                Are you sure?
+              </h3>
+              <p className="text-[10px] tracking-widest text-center opacity-70 mb-4">
+                This action cannot be undone.
+              </p>
+              <div className="flex gap-[10px]">
+                <button
+                  onClick={() => setConfirm(null)}
+                  className="flex-1 text-xs tracking-widest font-bold"
+                  style={{
+                    padding: "10px",
+                    borderRadius: "8px",
+                    background: "transparent",
+                    border: `1px solid ${accent}`,
+                    color: accent,
+                  }}
+                >
+                  CANCEL
+                </button>
+                <button
+                  onClick={() => { const a = confirm.action; setConfirm(null); a(); }}
+                  className="flex-1 text-xs tracking-widest font-bold"
+                  style={{
+                    padding: "10px",
+                    borderRadius: "8px",
+                    background: "#ef4444",
+                    color: "#000",
+                    boxShadow: "0 0 12px #ef444488",
+                  }}
+                >
+                  YES, DELETE
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

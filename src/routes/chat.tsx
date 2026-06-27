@@ -49,6 +49,7 @@ function ChatPage() {
   const [attachOpen, setAttachOpen] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [imageMode, setImageMode] = useState(false);
   const cameraRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);

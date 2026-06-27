@@ -2,9 +2,31 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip, Settings } from "lucide-react";
+import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip, Settings, ImageIcon, Loader2 } from "lucide-react";
 import { RenderMessage } from "@/components/CodeBlock";
 import { SettingsModal } from "@/components/SettingsModal";
+
+const IMAGE_TRIGGERS = /(buatkan gambar|generate image|buat foto|\/imagine|imagine)/i;
+const IMG_PREFIX = "__IMG__:";
+
+function ImageMessage({ content }: { content: string }) {
+  const prompt = content.slice(IMG_PREFIX.length);
+  const url = `https://placehold.co/600x400/0a0a0a/3b82f6?text=AI+Image`;
+  return (
+    <div className="space-y-2">
+      <img
+        src={url}
+        alt={prompt}
+        className="rounded max-w-full"
+        style={{
+          border: "1px solid var(--accent-color)",
+          boxShadow: "0 0 20px var(--accent-color)",
+        }}
+      />
+      <p className="text-[10px] tracking-wider text-neon/70">Prompt: {prompt}</p>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/chat")({
   ssr: false,

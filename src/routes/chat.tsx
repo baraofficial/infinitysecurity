@@ -2,9 +2,31 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip, Settings } from "lucide-react";
+import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip, Settings, ImageIcon, Loader2 } from "lucide-react";
 import { RenderMessage } from "@/components/CodeBlock";
 import { SettingsModal } from "@/components/SettingsModal";
+
+const IMAGE_TRIGGERS = /(buatkan gambar|generate image|buat foto|\/imagine|imagine)/i;
+const IMG_PREFIX = "__IMG__:";
+
+function ImageMessage({ content }: { content: string }) {
+  const prompt = content.slice(IMG_PREFIX.length);
+  const url = `https://placehold.co/600x400/0a0a0a/3b82f6?text=AI+Image`;
+  return (
+    <div className="space-y-2">
+      <img
+        src={url}
+        alt={prompt}
+        className="rounded max-w-full"
+        style={{
+          border: "1px solid var(--accent-color)",
+          boxShadow: "0 0 20px var(--accent-color)",
+        }}
+      />
+      <p className="text-[10px] tracking-wider text-neon/70">Prompt: {prompt}</p>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/chat")({
   ssr: false,
@@ -27,6 +49,7 @@ function ChatPage() {
   const [attachOpen, setAttachOpen] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [imageMode, setImageMode] = useState(false);
   const cameraRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -117,29 +140,40 @@ function ChatPage() {
         conversation_id: convId, user_id: userId, role: "user", content: text,
       });
 
-      const history = [...messages, userMsg].map((m) => ({ role: m.role, content: m.content }));
+      const isImageReq = imageMode || IMAGE_TRIGGERS.test(text);
 
-      const { data: sess } = await supabase.auth.getSession();
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${sess.session?.access_token ?? ""}`,
-        },
-        body: JSON.stringify({ messages: history }),
-      });
-      if (!res.ok) {
-        const t = await res.text();
-        throw new Error(t || "AI request failed");
+      if (isImageReq) {
+        const cleanPrompt = text.replace(IMAGE_TRIGGERS, "").trim() || text;
+        await new Promise((r) => setTimeout(r, 2500));
+        const imgContent = IMG_PREFIX + cleanPrompt;
+        const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content: imgContent };
+        setMessages((m) => [...m, aiMsg]);
+        await supabase.from("messages").insert({
+          conversation_id: convId, user_id: userId, role: "assistant", content: imgContent,
+        });
+        setImageMode(false);
+      } else {
+        const history = [...messages, userMsg].map((m) => ({ role: m.role, content: m.content }));
+        const { data: sess } = await supabase.auth.getSession();
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${sess.session?.access_token ?? ""}`,
+          },
+          body: JSON.stringify({ messages: history }),
+        });
+        if (!res.ok) {
+          const t = await res.text();
+          throw new Error(t || "AI request failed");
+        }
+        const { content } = (await res.json()) as { content: string };
+        const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content };
+        setMessages((m) => [...m, aiMsg]);
+        await supabase.from("messages").insert({
+          conversation_id: convId, user_id: userId, role: "assistant", content,
+        });
       }
-      const { content } = (await res.json()) as { content: string };
-
-      const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content };
-      setMessages((m) => [...m, aiMsg]);
-
-      await supabase.from("messages").insert({
-        conversation_id: convId, user_id: userId, role: "assistant", content,
-      });
       await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", convId);
       loadConversations();
     } catch (err) {
@@ -253,15 +287,30 @@ function ChatPage() {
                 <div className="text-[9px] tracking-widest text-neon/60 mb-1">
                   {m.role === "user" ? `> ${username}` : "> bara"}
                 </div>
-                {m.role === "assistant" ? <RenderMessage content={m.content} /> : <span className="whitespace-pre-wrap">{m.content}</span>}
+                {m.role === "assistant" ? (
+                  m.content.startsWith(IMG_PREFIX)
+                    ? <ImageMessage content={m.content} />
+                    : <RenderMessage content={m.content} />
+                ) : (
+                  <span className="whitespace-pre-wrap">{m.content}</span>
+                )}
               </div>
             </div>
           ))}
           {sending && (
             <div className="flex justify-start">
-              <div className="border border-neon/40 px-4 py-3 text-sm text-neon/70">
-                <span className="inline-block animate-pulse">thinking</span>
-                <span className="ml-1 animate-pulse">▍</span>
+              <div className="border border-neon/40 px-4 py-3 text-sm flex items-center gap-2" style={{ color: "var(--accent-color)" }}>
+                {imageMode || IMAGE_TRIGGERS.test(input + " " + (messages[messages.length - 1]?.content ?? "")) ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>🎨 Generating your image...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="inline-block animate-pulse">thinking</span>
+                    <span className="ml-1 animate-pulse">▍</span>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -322,10 +371,20 @@ function ChatPage() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="type a message..."
+              placeholder={imageMode ? "Describe the image you want..." : "type a message..."}
               disabled={sending}
               className="flex-1 bg-transparent text-neon text-sm outline-none placeholder:text-neon/40 caret-neon py-2"
             />
+            <button
+              type="button"
+              onClick={() => setImageMode((v) => !v)}
+              className={`p-2 transition ${imageMode ? "bg-neon/20" : "text-neon hover:bg-neon/10"}`}
+              style={imageMode ? { color: "var(--accent-color)" } : undefined}
+              aria-label="image mode"
+              title="Generate image"
+            >
+              <ImageIcon size={18} />
+            </button>
             <button
               type="submit"
               disabled={(!input.trim() && attachments.length === 0) || sending}

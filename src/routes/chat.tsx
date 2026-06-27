@@ -371,10 +371,20 @@ function ChatPage() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="type a message..."
+              placeholder={imageMode ? "Describe the image you want..." : "type a message..."}
               disabled={sending}
               className="flex-1 bg-transparent text-neon text-sm outline-none placeholder:text-neon/40 caret-neon py-2"
             />
+            <button
+              type="button"
+              onClick={() => setImageMode((v) => !v)}
+              className={`p-2 transition ${imageMode ? "bg-neon/20" : "text-neon hover:bg-neon/10"}`}
+              style={imageMode ? { color: "var(--accent-color)" } : undefined}
+              aria-label="image mode"
+              title="Generate image"
+            >
+              <ImageIcon size={18} />
+            </button>
             <button
               type="submit"
               disabled={(!input.trim() && attachments.length === 0) || sending}

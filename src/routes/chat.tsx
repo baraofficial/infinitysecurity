@@ -140,29 +140,40 @@ function ChatPage() {
         conversation_id: convId, user_id: userId, role: "user", content: text,
       });
 
-      const history = [...messages, userMsg].map((m) => ({ role: m.role, content: m.content }));
+      const isImageReq = imageMode || IMAGE_TRIGGERS.test(text);
 
-      const { data: sess } = await supabase.auth.getSession();
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${sess.session?.access_token ?? ""}`,
-        },
-        body: JSON.stringify({ messages: history }),
-      });
-      if (!res.ok) {
-        const t = await res.text();
-        throw new Error(t || "AI request failed");
+      if (isImageReq) {
+        const cleanPrompt = text.replace(IMAGE_TRIGGERS, "").trim() || text;
+        await new Promise((r) => setTimeout(r, 2500));
+        const imgContent = IMG_PREFIX + cleanPrompt;
+        const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content: imgContent };
+        setMessages((m) => [...m, aiMsg]);
+        await supabase.from("messages").insert({
+          conversation_id: convId, user_id: userId, role: "assistant", content: imgContent,
+        });
+        setImageMode(false);
+      } else {
+        const history = [...messages, userMsg].map((m) => ({ role: m.role, content: m.content }));
+        const { data: sess } = await supabase.auth.getSession();
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${sess.session?.access_token ?? ""}`,
+          },
+          body: JSON.stringify({ messages: history }),
+        });
+        if (!res.ok) {
+          const t = await res.text();
+          throw new Error(t || "AI request failed");
+        }
+        const { content } = (await res.json()) as { content: string };
+        const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content };
+        setMessages((m) => [...m, aiMsg]);
+        await supabase.from("messages").insert({
+          conversation_id: convId, user_id: userId, role: "assistant", content,
+        });
       }
-      const { content } = (await res.json()) as { content: string };
-
-      const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content };
-      setMessages((m) => [...m, aiMsg]);
-
-      await supabase.from("messages").insert({
-        conversation_id: convId, user_id: userId, role: "assistant", content,
-      });
       await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", convId);
       loadConversations();
     } catch (err) {

@@ -83,8 +83,11 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+import { initThemeFromStorage } from "@/lib/theme";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => { initThemeFromStorage(); }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />

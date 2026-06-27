@@ -4,16 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
-type ThemeKey = "purple" | "green" | "blue";
-const THEMES: Record<ThemeKey, string> = {
-  purple: "#a855f7",
-  green: "#22c55e",
-  blue: "#3b82f6",
-};
-
-function applyTheme(t: ThemeKey) {
-  document.documentElement.style.setProperty("--accent-color", THEMES[t]);
-}
+import { THEME_COLORS as THEMES, applyTheme, type ThemeKey } from "@/lib/theme";
 
 type ConfirmCfg = { title?: string; action: () => void } | null;
 

@@ -287,15 +287,30 @@ function ChatPage() {
                 <div className="text-[9px] tracking-widest text-neon/60 mb-1">
                   {m.role === "user" ? `> ${username}` : "> bara"}
                 </div>
-                {m.role === "assistant" ? <RenderMessage content={m.content} /> : <span className="whitespace-pre-wrap">{m.content}</span>}
+                {m.role === "assistant" ? (
+                  m.content.startsWith(IMG_PREFIX)
+                    ? <ImageMessage content={m.content} />
+                    : <RenderMessage content={m.content} />
+                ) : (
+                  <span className="whitespace-pre-wrap">{m.content}</span>
+                )}
               </div>
             </div>
           ))}
           {sending && (
             <div className="flex justify-start">
-              <div className="border border-neon/40 px-4 py-3 text-sm text-neon/70">
-                <span className="inline-block animate-pulse">thinking</span>
-                <span className="ml-1 animate-pulse">▍</span>
+              <div className="border border-neon/40 px-4 py-3 text-sm flex items-center gap-2" style={{ color: "var(--accent-color)" }}>
+                {imageMode || IMAGE_TRIGGERS.test(input + " " + (messages[messages.length - 1]?.content ?? "")) ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>🎨 Generating your image...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="inline-block animate-pulse">thinking</span>
+                    <span className="ml-1 animate-pulse">▍</span>
+                  </>
+                )}
               </div>
             </div>
           )}

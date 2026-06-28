@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip, Settings, ImageIcon, Loader2 } from "lucide-react";
+import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip, Settings, Loader2 } from "lucide-react";
 import { RenderMessage } from "@/components/CodeBlock";
 import { SettingsModal } from "@/components/SettingsModal";
 
@@ -375,16 +375,6 @@ function ChatPage() {
               disabled={sending}
               className="flex-1 bg-transparent text-neon text-sm outline-none placeholder:text-neon/40 caret-neon py-2"
             />
-            <button
-              type="button"
-              onClick={() => setImageMode((v) => !v)}
-              className={`p-2 transition ${imageMode ? "bg-neon/20" : "text-neon hover:bg-neon/10"}`}
-              style={imageMode ? { color: "var(--accent-color)" } : undefined}
-              aria-label="image mode"
-              title="Generate image"
-            >
-              <ImageIcon size={18} />
-            </button>
             <button
               type="submit"
               disabled={(!input.trim() && attachments.length === 0) || sending}

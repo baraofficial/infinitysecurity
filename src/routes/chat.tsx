@@ -394,9 +394,6 @@ function ChatPage() {
               <Send size={18} />
             </button>
           </div>
-          <p className="mt-2 text-center text-[9px] tracking-widest text-muted-foreground">
-            powered by darkness ai
-          </p>
         </form>
       </main>
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />

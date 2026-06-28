@@ -73,7 +73,7 @@ function AuthPage() {
       <div className="w-full max-w-md">
         <div className="mb-6 text-center">
           <h1 className="text-xl text-neon tracking-[0.3em]" style={{ textShadow: "0 0 14px var(--neon)" }}>
-            DARKNESS AI
+            INFINITY AI
           </h1>
           <p className="text-[10px] text-muted-foreground tracking-widest mt-1">[ PREMIUM AI ]</p>
         </div>
@@ -124,9 +124,6 @@ function AuthPage() {
             )}
           </div>
         </div>
-        <p className="mt-6 text-center text-[10px] text-muted-foreground tracking-widest">
-          powered by darkness ai
-        </p>
         <div className="mt-2 text-center">
           <Link to="/" className="text-[10px] text-neon/60 hover:text-neon">&lt; back</Link>
         </div>

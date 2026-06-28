@@ -269,7 +269,7 @@ function ChatPage() {
             <div className="h-full flex items-center justify-center text-center px-4">
               <div>
                 <div className="text-xl sm:text-2xl text-neon tracking-[0.2em]" style={{ textShadow: "0 0 14px var(--neon)" }}>
-                  Welcome to Darkness AI
+                  Welcome to Infinity AI
                 </div>
                 <p className="mt-3 text-xs text-neon/60 tracking-widest">by Bara Official</p>
               </div>

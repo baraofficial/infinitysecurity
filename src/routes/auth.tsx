@@ -124,9 +124,6 @@ function AuthPage() {
             )}
           </div>
         </div>
-        <p className="mt-6 text-center text-[10px] text-muted-foreground tracking-widest">
-          powered by darkness ai
-        </p>
         <div className="mt-2 text-center">
           <Link to="/" className="text-[10px] text-neon/60 hover:text-neon">&lt; back</Link>
         </div>

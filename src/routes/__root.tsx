@@ -71,10 +71,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
+const THEME_INIT_SCRIPT = `(function(){try{var m={purple:'#a855f7',green:'#22c55e',blue:'#3b82f6'};var d={purple:'#6b21a8',green:'#15803d',blue:'#1d4ed8'};var t=localStorage.getItem('theme');if(!m[t])t='purple';var c=m[t],x=d[t],r=document.documentElement.style;r.setProperty('--accent-color',c);r.setProperty('--neon',c);r.setProperty('--neon-dim',x);r.setProperty('--primary',c);r.setProperty('--ring',c);r.setProperty('--border',c);r.setProperty('--shadow-neon','0 0 12px '+c+'99');r.setProperty('--shadow-neon-sm','0 0 6px '+c+'66');}catch(e){}})();`;
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <head><HeadContent /></head>
+      <head>
+        <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body>
         {children}
         <Scripts />

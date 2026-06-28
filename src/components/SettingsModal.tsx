@@ -81,6 +81,8 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
         localStorage.setItem("registeredUsers", JSON.stringify(list));
       }
       localStorage.setItem("currentUser", trimmed);
+      localStorage.setItem("theme", theme);
+      applyTheme(theme);
       if (photo) localStorage.setItem("profilePhoto", photo);
       toast.success("✓ Saved!", {
         duration: 1500,

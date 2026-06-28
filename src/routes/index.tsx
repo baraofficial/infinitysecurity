@@ -27,7 +27,7 @@ function Splash() {
           className={`text-3xl sm:text-5xl md:text-6xl font-bold text-neon tracking-widest ${glitch ? "animate-pulse" : ""}`}
           style={{ textShadow: "0 0 20px var(--neon), 0 0 40px var(--neon-dim)" }}
         >
-          DARKNESS AI
+          INFINITY AI
         </h1>
         <p className="mt-4 text-xs sm:text-sm text-neon/80 tracking-[0.4em]">[ PREMIUM AI ]</p>
       </div>

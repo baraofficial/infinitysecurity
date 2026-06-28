@@ -31,10 +31,6 @@ function Splash() {
         </h1>
         <p className="mt-4 text-xs sm:text-sm text-neon/80 tracking-[0.4em]">[ PREMIUM AI ]</p>
       </div>
-      <div className="mt-10 flex items-center gap-2 text-[10px] sm:text-xs text-muted-foreground tracking-widest">
-        <span className="h-1 w-1 rounded-full bg-neon animate-pulse" />
-        powered by darkness ai
-      </div>
     </div>
   );
 }

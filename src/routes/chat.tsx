@@ -260,7 +260,7 @@ function ChatPage() {
             <Menu size={18} />
           </button>
           <div className="text-xs tracking-[0.3em] text-neon" style={{ textShadow: "0 0 8px var(--neon)" }}>
-            DARKNESS AI <span className="text-neon/50">[ PREMIUM AI ]</span>
+            INFINITY AI <span className="text-neon/50">[ PREMIUM AI ]</span>
           </div>
         </header>
 

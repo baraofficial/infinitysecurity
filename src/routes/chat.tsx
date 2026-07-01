@@ -271,7 +271,6 @@ function ChatPage() {
                 <div className="text-xl sm:text-2xl text-neon tracking-[0.2em]" style={{ textShadow: "0 0 14px var(--neon)" }}>
                   Welcome to Infinity AI
                 </div>
-                <p className="mt-3 text-xs text-neon/60 tracking-widest">by Bara Official</p>
               </div>
             </div>
           )}

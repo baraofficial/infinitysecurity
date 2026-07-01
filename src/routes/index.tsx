@@ -35,6 +35,12 @@ function Splash() {
       >
         Loading Infinity AI...
       </p>
+      <p
+        className="mt-2 text-xs tracking-[0.2em] opacity-70"
+        style={{ color: "var(--accent-color)" }}
+      >
+        created by Bara Official
+      </p>
       <div className="mt-6 w-64 h-1 bg-neon/20 overflow-hidden rounded">
         <div
           className="h-full animate-[loading_2.2s_ease-in-out_forwards]"

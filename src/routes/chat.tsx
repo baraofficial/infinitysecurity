@@ -284,7 +284,7 @@ function ChatPage() {
                 }`}
               >
                 <div className="text-[9px] tracking-widest text-neon/60 mb-1">
-                  {m.role === "user" ? `> ${username}` : "> bara"}
+                  {m.role === "user" ? `> ${username}` : "> infinity"}
                 </div>
                 {m.role === "assistant" ? (
                   m.content.startsWith(IMG_PREFIX)

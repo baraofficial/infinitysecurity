@@ -156,13 +156,30 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
     localStorage.removeItem("chatHistory");
     window.location.reload();
   }
-  function doClearCache() {
-    const users = localStorage.getItem("registeredUsers");
-    const th = localStorage.getItem("theme");
-    localStorage.clear();
-    if (users) localStorage.setItem("registeredUsers", users);
-    if (th) localStorage.setItem("theme", th);
-    window.location.reload();
+  async function doClearCache() {
+    // Only remove junk: non-protected localStorage keys, sessionStorage, Cache Storage.
+    // Preserve: user account, chat history, profile photo, theme, supabase auth.
+    try {
+      const toRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k) continue;
+        if (PROTECTED_KEYS.has(k) || k.startsWith("sb-")) continue;
+        toRemove.push(k);
+      }
+      toRemove.forEach((k) => localStorage.removeItem(k));
+      sessionStorage.clear();
+      if ("caches" in window) {
+        const names = await caches.keys();
+        await Promise.all(names.map((n) => caches.delete(n)));
+      }
+    } catch {}
+    toast.success("✓ Cache cleared", {
+      duration: 1500,
+      style: { background: "#0a0a0a", color: "#22c55e", border: "1px solid #22c55e" },
+    });
+    const n = await computeCacheSize();
+    setCacheSize(formatBytes(n));
   }
 
   const disabled = saving;

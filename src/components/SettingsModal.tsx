@@ -77,6 +77,8 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
     setError("");
     setSaving(false);
     setConfirm(null);
+    setCacheSize("…");
+    computeCacheSize().then((n) => setCacheSize(formatBytes(n)));
   }, [open]);
 
   // apply theme globally on mount and on change

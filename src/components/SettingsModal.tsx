@@ -302,6 +302,13 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
           >
             <Trash2 size={14} /> CLEAR CHAT
           </button>
+          <div
+            className="flex items-center justify-between text-[10px] tracking-widest pt-1 opacity-80"
+            style={{ color: accent }}
+          >
+            <span>&gt; CACHE</span>
+            <span>{cacheSize}</span>
+          </div>
           <button
             onClick={() => setConfirm({ action: doClearCache })}
             disabled={disabled}

@@ -271,7 +271,6 @@ function ChatPage() {
                 <div className="text-xl sm:text-2xl text-neon tracking-[0.2em]" style={{ textShadow: "0 0 14px var(--neon)" }}>
                   Welcome to Infinity AI
                 </div>
-                <p className="mt-3 text-xs text-neon/60 tracking-widest">by Bara Official</p>
               </div>
             </div>
           )}
@@ -285,7 +284,7 @@ function ChatPage() {
                 }`}
               >
                 <div className="text-[9px] tracking-widest text-neon/60 mb-1">
-                  {m.role === "user" ? `> ${username}` : "> bara"}
+                  {m.role === "user" ? `> ${username}` : "> infinity"}
                 </div>
                 {m.role === "assistant" ? (
                   m.content.startsWith(IMG_PREFIX)

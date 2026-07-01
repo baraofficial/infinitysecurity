@@ -8,6 +8,49 @@ import { THEME_COLORS as THEMES, applyTheme, type ThemeKey } from "@/lib/theme";
 
 type ConfirmCfg = { title?: string; action: () => void } | null;
 
+const PROTECTED_KEYS = new Set([
+  "currentUser",
+  "profilePhoto",
+  "theme",
+  "registeredUsers",
+  "chatHistory",
+]);
+
+function formatBytes(n: number): string {
+  if (!n || n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+async function computeCacheSize(): Promise<number> {
+  let total = 0;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || PROTECTED_KEYS.has(k) || k.startsWith("sb-")) continue;
+      total += (k.length + (localStorage.getItem(k) || "").length) * 2;
+    }
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const k = sessionStorage.key(i);
+      if (!k) continue;
+      total += (k.length + (sessionStorage.getItem(k) || "").length) * 2;
+    }
+    if ("caches" in window) {
+      const names = await caches.keys();
+      for (const n of names) {
+        const c = await caches.open(n);
+        const reqs = await c.keys();
+        for (const r of reqs) {
+          const resp = await c.match(r);
+          const buf = await resp?.clone().arrayBuffer();
+          if (buf) total += buf.byteLength;
+        }
+      }
+    }
+  } catch {}
+  return total;
+}
+
 export function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const navigate = useNavigate();
   const [savedPhoto, setSavedPhoto] = useState<string>("");
@@ -18,6 +61,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
   const [theme, setTheme] = useState<ThemeKey>("purple");
   const [saving, setSaving] = useState(false);
   const [confirm, setConfirm] = useState<ConfirmCfg>(null);
+  const [cacheSize, setCacheSize] = useState<string>("—");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const accent = THEMES[theme];
@@ -33,6 +77,8 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
     setError("");
     setSaving(false);
     setConfirm(null);
+    setCacheSize("…");
+    computeCacheSize().then((n) => setCacheSize(formatBytes(n)));
   }, [open]);
 
   // apply theme globally on mount and on change
@@ -110,13 +156,30 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
     localStorage.removeItem("chatHistory");
     window.location.reload();
   }
-  function doClearCache() {
-    const users = localStorage.getItem("registeredUsers");
-    const th = localStorage.getItem("theme");
-    localStorage.clear();
-    if (users) localStorage.setItem("registeredUsers", users);
-    if (th) localStorage.setItem("theme", th);
-    window.location.reload();
+  async function doClearCache() {
+    // Only remove junk: non-protected localStorage keys, sessionStorage, Cache Storage.
+    // Preserve: user account, chat history, profile photo, theme, supabase auth.
+    try {
+      const toRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k) continue;
+        if (PROTECTED_KEYS.has(k) || k.startsWith("sb-")) continue;
+        toRemove.push(k);
+      }
+      toRemove.forEach((k) => localStorage.removeItem(k));
+      sessionStorage.clear();
+      if ("caches" in window) {
+        const names = await caches.keys();
+        await Promise.all(names.map((n) => caches.delete(n)));
+      }
+    } catch {}
+    toast.success("✓ Cache cleared", {
+      duration: 1500,
+      style: { background: "#0a0a0a", color: "#22c55e", border: "1px solid #22c55e" },
+    });
+    const n = await computeCacheSize();
+    setCacheSize(formatBytes(n));
   }
 
   const disabled = saving;
@@ -239,6 +302,13 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
           >
             <Trash2 size={14} /> CLEAR CHAT
           </button>
+          <div
+            className="flex items-center justify-between text-[10px] tracking-widest pt-1 opacity-80"
+            style={{ color: accent }}
+          >
+            <span>&gt; CACHE</span>
+            <span>{cacheSize}</span>
+          </div>
           <button
             onClick={() => setConfirm({ action: doClearCache })}
             disabled={disabled}

@@ -99,6 +99,12 @@ export function CodeBlock({ code, lang }: { code: string; lang: string }) {
   );
 }
 
+function stripMarkdownEmphasis(s: string) {
+  return s
+    .replace(/\*\*(.+?)\*\*/gs, "$1")
+    .replace(/(^|[^*])\*(?!\s)([^*\n]+?)\*(?!\*)/g, "$1$2");
+}
+
 export function RenderMessage({ content }: { content: string }) {
   const parts: Array<{ type: "text" | "code"; content: string; lang?: string }> = [];
   const re = /```(\w*)\n?([\s\S]*?)```/g;
@@ -110,7 +116,7 @@ export function RenderMessage({ content }: { content: string }) {
     last = m.index + m[0].length;
   }
   if (last < content.length) parts.push({ type: "text", content: content.slice(last) });
-  if (parts.length === 0) return <>{content}</>;
+  if (parts.length === 0) return <>{stripMarkdownEmphasis(content)}</>;
 
   return (
     <>
@@ -118,7 +124,7 @@ export function RenderMessage({ content }: { content: string }) {
         p.type === "code" ? (
           <CodeBlock key={i} code={p.content} lang={p.lang || ""} />
         ) : (
-          <span key={i} className="whitespace-pre-wrap">{p.content}</span>
+          <span key={i} className="whitespace-pre-wrap">{stripMarkdownEmphasis(p.content)}</span>
         ),
       )}
     </>

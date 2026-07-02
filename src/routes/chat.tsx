@@ -34,7 +34,7 @@ export const Route = createFileRoute("/chat")({
 });
 
 type Conversation = { id: string; title: string; updated_at: string };
-type Message = { id: string; role: "user" | "assistant"; content: string };
+type Message = { id: string; role: "user" | "assistant"; content: string; media?: { url: string; type: string }[] };
 
 function ChatPage() {
   const navigate = useNavigate();
@@ -116,7 +116,8 @@ function ChatPage() {
 
   async function send() {
     const text = input.trim();
-    if (!text || sending || !userId) return;
+    if ((!text && attachments.length === 0) || sending || !userId) return;
+    const titleText = text || (attachments.length ? `[${attachments.length} media]` : "chat");
     setInput("");
     setSending(true);
 
@@ -125,7 +126,7 @@ function ChatPage() {
       if (!convId) {
         const { data: conv, error } = await supabase
           .from("conversations")
-          .insert({ user_id: userId, title: text.slice(0, 40) })
+          .insert({ user_id: userId, title: titleText.slice(0, 40) })
           .select("id")
           .single();
         if (error) throw error;
@@ -133,8 +134,13 @@ function ChatPage() {
         setActiveId(convId);
       }
 
-      const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: text };
+      const media = attachments.map((f) => ({
+        url: URL.createObjectURL(f),
+        type: f.type.startsWith("video/") ? "video" : "image",
+      }));
+      const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: text, media };
       setMessages((m) => [...m, userMsg]);
+      setAttachments([]);
 
       await supabase.from("messages").insert({
         conversation_id: convId, user_id: userId, role: "user", content: text,
@@ -294,7 +300,32 @@ function ChatPage() {
                     ? <ImageMessage content={m.content} />
                     : <RenderMessage content={m.content} />
                 ) : (
-                  <span className="whitespace-pre-wrap">{m.content}</span>
+                  <div className="space-y-2">
+                    {m.media && m.media.length > 0 && (
+                      <div className="space-y-2">
+                        {m.media.map((mm, i) =>
+                          mm.type === "video" ? (
+                            <video
+                              key={i}
+                              src={mm.url}
+                              controls
+                              className="rounded max-w-full"
+                              style={{ border: "1px solid var(--accent-color)", boxShadow: "0 0 12px var(--accent-color)" }}
+                            />
+                          ) : (
+                            <img
+                              key={i}
+                              src={mm.url}
+                              alt="attachment"
+                              className="rounded max-w-full"
+                              style={{ border: "1px solid var(--accent-color)", boxShadow: "0 0 12px var(--accent-color)" }}
+                            />
+                          ),
+                        )}
+                      </div>
+                    )}
+                    {m.content && <span className="whitespace-pre-wrap block">{m.content}</span>}
+                  </div>
                 )}
               </div>
             </div>

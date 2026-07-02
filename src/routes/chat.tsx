@@ -133,8 +133,13 @@ function ChatPage() {
         setActiveId(convId);
       }
 
-      const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: text };
+      const media = attachments.map((f) => ({
+        url: URL.createObjectURL(f),
+        type: f.type.startsWith("video/") ? "video" : "image",
+      }));
+      const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: text, media };
       setMessages((m) => [...m, userMsg]);
+      setAttachments([]);
 
       await supabase.from("messages").insert({
         conversation_id: convId, user_id: userId, role: "user", content: text,

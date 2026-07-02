@@ -41,7 +41,7 @@ export const Route = createFileRoute("/api/chat")({
             "Lovable-API-Key": apiKey,
           },
           body: JSON.stringify({
-            model: "google/gemini-3-flash-preview",
+            model: "google/gemini-2.5-pro",
             messages: [
               { role: "system", content: SYSTEM_PROMPT },
               ...body.messages.slice(-30),

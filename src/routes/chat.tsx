@@ -126,7 +126,7 @@ function ChatPage() {
       if (!convId) {
         const { data: conv, error } = await supabase
           .from("conversations")
-          .insert({ user_id: userId, title: text.slice(0, 40) })
+          .insert({ user_id: userId, title: titleText.slice(0, 40) })
           .select("id")
           .single();
         if (error) throw error;

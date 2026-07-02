@@ -300,7 +300,32 @@ function ChatPage() {
                     ? <ImageMessage content={m.content} />
                     : <RenderMessage content={m.content} />
                 ) : (
-                  <span className="whitespace-pre-wrap">{m.content}</span>
+                  <div className="space-y-2">
+                    {m.media && m.media.length > 0 && (
+                      <div className="space-y-2">
+                        {m.media.map((mm, i) =>
+                          mm.type === "video" ? (
+                            <video
+                              key={i}
+                              src={mm.url}
+                              controls
+                              className="rounded max-w-full"
+                              style={{ border: "1px solid var(--accent-color)", boxShadow: "0 0 12px var(--accent-color)" }}
+                            />
+                          ) : (
+                            <img
+                              key={i}
+                              src={mm.url}
+                              alt="attachment"
+                              className="rounded max-w-full"
+                              style={{ border: "1px solid var(--accent-color)", boxShadow: "0 0 12px var(--accent-color)" }}
+                            />
+                          ),
+                        )}
+                      </div>
+                    )}
+                    {m.content && <span className="whitespace-pre-wrap block">{m.content}</span>}
+                  </div>
                 )}
               </div>
             </div>

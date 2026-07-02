@@ -34,7 +34,7 @@ export const Route = createFileRoute("/chat")({
 });
 
 type Conversation = { id: string; title: string; updated_at: string };
-type Message = { id: string; role: "user" | "assistant"; content: string };
+type Message = { id: string; role: "user" | "assistant"; content: string; media?: { url: string; type: string }[] };
 
 function ChatPage() {
   const navigate = useNavigate();

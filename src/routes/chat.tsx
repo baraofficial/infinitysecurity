@@ -116,7 +116,8 @@ function ChatPage() {
 
   async function send() {
     const text = input.trim();
-    if (!text || sending || !userId) return;
+    if ((!text && attachments.length === 0) || sending || !userId) return;
+    const titleText = text || (attachments.length ? `[${attachments.length} media]` : "chat");
     setInput("");
     setSending(true);
 

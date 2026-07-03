@@ -204,7 +204,7 @@ function ChatPage() {
         <div className="p-4 border-b-2 border-neon/60">
           <button
             onClick={newChat}
-            className="mt-3 w-full border border-neon px-3 py-2 text-xs tracking-widest hover:bg-neon hover:text-black transition flex items-center gap-2 justify-center"
+            className="mt-3 w-full border border-neon px-3 py-2 text-xs tracking-widest hover:bg-neon hover:text-black transition flex items-center gap-2 justify-center rounded-2xl"
           >
             <Plus size={14} /> NEW CHAT
           </button>
@@ -216,7 +216,7 @@ function ChatPage() {
           {conversations.map((c) => (
             <div
               key={c.id}
-              className={`group flex items-center gap-2 px-2 py-2 border text-xs cursor-pointer transition ${
+              className={`group flex items-center gap-2 px-3 py-2 border text-xs cursor-pointer transition rounded-2xl ${
                 activeId === c.id ? "border-neon bg-neon/10" : "border-transparent hover:border-neon/40"
               }`}
               onClick={() => { setActiveId(c.id); setSidebarOpen(false); }}
@@ -237,8 +237,8 @@ function ChatPage() {
           <button
             onClick={() => setSettingsOpen(true)}
             aria-label="settings"
-            className="w-full flex items-center justify-center p-3 rounded-lg border transition"
-            style={{ borderColor: "#a855f733" }}
+            className="w-full flex items-center justify-center gap-2 p-3 rounded-2xl border transition text-xs tracking-widest"
+            style={{ borderColor: "#a855f733", color: "#a855f7" }}
             onMouseEnter={(e) => {
               e.currentTarget.style.borderColor = "#a855f7";
               e.currentTarget.style.backgroundColor = "#a855f722";
@@ -251,6 +251,7 @@ function ChatPage() {
             }}
           >
             <Settings size={18} color="#a855f7" />
+            <span>Setting</span>
           </button>
         </div>
       </aside>

@@ -317,7 +317,7 @@ function ChatPage() {
                               key={i}
                               src={mm.url}
                               alt="attachment"
-                              className="rounded max-w-full"
+                              className="max-w-full"
                               style={{ border: "1px solid var(--accent-color)", boxShadow: "0 0 12px var(--accent-color)" }}
                             />
                           ),

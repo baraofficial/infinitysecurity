@@ -60,22 +60,19 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
   const [photo, setPhoto] = useState<string>("");
   const [username, setUsername] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const [theme, setTheme] = useState<ThemeKey>("purple");
   const [saving, setSaving] = useState(false);
   const [confirm, setConfirm] = useState<ConfirmCfg>(null);
   const [cacheSize, setCacheSize] = useState<string>("—");
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const accent = THEMES[theme];
+  const accent = ACCENT;
 
   useEffect(() => {
     if (!open) return;
     const p = localStorage.getItem("profilePhoto") || "";
     const u = localStorage.getItem("currentUser") || "";
-    const t = (localStorage.getItem("theme") as ThemeKey) || "purple";
     setSavedPhoto(p); setPhoto(p);
     setSavedUsername(u); setUsername(u);
-    setTheme(THEMES[t] ? t : "purple");
     setError("");
     setSaving(false);
     setConfirm(null);
@@ -83,23 +80,13 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
     computeCacheSize().then((n) => setCacheSize(formatBytes(n)));
   }, [open]);
 
-  // apply theme globally on mount and on change
+  // lock theme to purple
   useEffect(() => {
-    const t = (localStorage.getItem("theme") as ThemeKey) || "purple";
-    if (THEMES[t]) applyTheme(t);
+    localStorage.setItem("theme", "purple");
+    applyTheme("purple");
   }, []);
 
-  useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
-
   if (!open) return null;
-
-  function pickTheme(t: ThemeKey) {
-    setTheme(t);
-    localStorage.setItem("theme", t);
-    applyTheme(t);
-  }
 
   function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
@@ -108,6 +95,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
     r.onload = () => setPhoto(String(r.result));
     r.readAsDataURL(f);
   }
+
 
   function handleSave() {
     const trimmed = username.trim();

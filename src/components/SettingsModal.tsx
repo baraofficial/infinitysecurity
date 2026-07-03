@@ -4,7 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
-import { THEME_COLORS as THEMES, applyTheme, type ThemeKey } from "@/lib/theme";
+import { applyTheme } from "@/lib/theme";
+
+const ACCENT = "#a855f7";
 
 type ConfirmCfg = { title?: string; action: () => void } | null;
 
@@ -58,22 +60,19 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
   const [photo, setPhoto] = useState<string>("");
   const [username, setUsername] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const [theme, setTheme] = useState<ThemeKey>("purple");
   const [saving, setSaving] = useState(false);
   const [confirm, setConfirm] = useState<ConfirmCfg>(null);
   const [cacheSize, setCacheSize] = useState<string>("—");
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const accent = THEMES[theme];
+  const accent = ACCENT;
 
   useEffect(() => {
     if (!open) return;
     const p = localStorage.getItem("profilePhoto") || "";
     const u = localStorage.getItem("currentUser") || "";
-    const t = (localStorage.getItem("theme") as ThemeKey) || "purple";
     setSavedPhoto(p); setPhoto(p);
     setSavedUsername(u); setUsername(u);
-    setTheme(THEMES[t] ? t : "purple");
     setError("");
     setSaving(false);
     setConfirm(null);
@@ -81,23 +80,13 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
     computeCacheSize().then((n) => setCacheSize(formatBytes(n)));
   }, [open]);
 
-  // apply theme globally on mount and on change
+  // lock theme to purple
   useEffect(() => {
-    const t = (localStorage.getItem("theme") as ThemeKey) || "purple";
-    if (THEMES[t]) applyTheme(t);
+    localStorage.setItem("theme", "purple");
+    applyTheme("purple");
   }, []);
 
-  useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
-
   if (!open) return null;
-
-  function pickTheme(t: ThemeKey) {
-    setTheme(t);
-    localStorage.setItem("theme", t);
-    applyTheme(t);
-  }
 
   function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
@@ -106,6 +95,7 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
     r.onload = () => setPhoto(String(r.result));
     r.readAsDataURL(f);
   }
+
 
   function handleSave() {
     const trimmed = username.trim();
@@ -127,8 +117,8 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
         localStorage.setItem("registeredUsers", JSON.stringify(list));
       }
       localStorage.setItem("currentUser", trimmed);
-      localStorage.setItem("theme", theme);
-      applyTheme(theme);
+      localStorage.setItem("theme", "purple");
+      applyTheme("purple");
       if (photo) localStorage.setItem("profilePhoto", photo);
       toast.success("✓ Saved!", {
         duration: 1500,
@@ -252,36 +242,6 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
             ⚠ {error}
           </div>
         )}
-
-        <div className="my-4" style={{ borderTop: `1px solid ${accent}66` }} />
-
-        {/* THEME SWITCHER */}
-        <div className="mb-4">
-          <span className="block text-[10px] tracking-widest mb-2">&gt; THEME</span>
-          <div className="flex gap-2">
-            {(Object.keys(THEMES) as ThemeKey[]).map((k) => {
-              const c = THEMES[k];
-              const active = theme === k;
-              return (
-                <button
-                  key={k}
-                  type="button"
-                  onClick={() => pickTheme(k)}
-                  disabled={disabled}
-                  className="flex-1 text-[10px] tracking-widest py-2 rounded-lg transition disabled:opacity-40"
-                  style={{
-                    background: active ? `${c}33` : "transparent",
-                    border: `1px solid ${c}`,
-                    color: c,
-                    boxShadow: active ? `0 0 10px ${c}99` : "none",
-                  }}
-                >
-                  {k === "purple" ? "🟣 PURPLE" : k === "green" ? "🟢 GREEN" : "🔵 BLUE"}
-                </button>
-              );
-            })}
-          </div>
-        </div>
 
         <div className="my-4" style={{ borderTop: `1px solid ${accent}66` }} />
 

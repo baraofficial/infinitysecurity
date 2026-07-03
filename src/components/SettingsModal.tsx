@@ -4,7 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
-import { THEME_COLORS as THEMES, applyTheme, type ThemeKey } from "@/lib/theme";
+import { applyTheme } from "@/lib/theme";
+
+const ACCENT = "#a855f7";
 
 type ConfirmCfg = { title?: string; action: () => void } | null;
 

@@ -19,7 +19,7 @@ function Splash() {
   }, [navigate]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-black font-mono px-6 text-center">
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-black font-mono px-6 text-center">
       <h1
         className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-widest"
         style={{
@@ -35,18 +35,18 @@ function Splash() {
       >
         Loading Infinity AI...
       </p>
-      <p
-        className="mt-2 text-xs tracking-[0.2em] opacity-70"
-        style={{ color: "var(--accent-color)" }}
-      >
-        created by Bara Official
-      </p>
       <div className="mt-6 w-64 h-1 bg-neon/20 overflow-hidden rounded">
         <div
           className="h-full animate-[loading_2.2s_ease-in-out_forwards]"
           style={{ background: "var(--accent-color)" }}
         />
       </div>
+      <p
+        className="absolute bottom-8 left-0 right-0 text-center text-[11px] tracking-[0.2em] opacity-70"
+        style={{ color: "var(--accent-color)" }}
+      >
+        created by Bara Official
+      </p>
       <style>{`
         @keyframes loading {
           from { width: 0%; }

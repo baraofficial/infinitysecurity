@@ -245,36 +245,6 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
 
         <div className="my-4" style={{ borderTop: `1px solid ${accent}66` }} />
 
-        {/* THEME SWITCHER */}
-        <div className="mb-4">
-          <span className="block text-[10px] tracking-widest mb-2">&gt; THEME</span>
-          <div className="flex gap-2">
-            {(Object.keys(THEMES) as ThemeKey[]).map((k) => {
-              const c = THEMES[k];
-              const active = theme === k;
-              return (
-                <button
-                  key={k}
-                  type="button"
-                  onClick={() => pickTheme(k)}
-                  disabled={disabled}
-                  className="flex-1 text-[10px] tracking-widest py-2 rounded-lg transition disabled:opacity-40"
-                  style={{
-                    background: active ? `${c}33` : "transparent",
-                    border: `1px solid ${c}`,
-                    color: c,
-                    boxShadow: active ? `0 0 10px ${c}99` : "none",
-                  }}
-                >
-                  {k === "purple" ? "🟣 PURPLE" : k === "green" ? "🟢 GREEN" : "🔵 BLUE"}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="my-4" style={{ borderTop: `1px solid ${accent}66` }} />
-
         <div className="space-y-2">
           <button
             onClick={() => setConfirm({ action: doLogOut })}

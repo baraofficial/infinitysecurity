@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip, Settings, Loader2, Search } from "lucide-react";
+import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip, Settings, Loader2 } from "lucide-react";
 import { RenderMessage } from "@/components/CodeBlock";
 import { SettingsModal } from "@/components/SettingsModal";
 
@@ -46,7 +46,7 @@ function ChatPage() {
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [attachOpen, setAttachOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [imageMode, setImageMode] = useState(false);
@@ -366,25 +366,28 @@ function ChatPage() {
           onSubmit={(e) => { e.preventDefault(); send(); }}
           className="border-t-2 border-neon p-3 sm:p-4"
         >
-          <div className="relative flex items-center gap-2 rounded-full bg-[#1F1F1F] border border-transparent pl-4 pr-2 py-1">
-            {attachOpen && (
-              <div className="absolute bottom-full left-0 mb-2 w-44 rounded-2xl border-2 border-neon bg-black z-10 overflow-hidden" style={{ boxShadow: "var(--shadow-neon)" }}>
+          <div className="relative flex items-center gap-2 rounded-full bg-[#1F1F1F] border border-[#8B5CF6] pl-2 pr-2 py-1">
+            {/* Menu Dropdown */}
+            {menuOpen && (
+              <div className="absolute bottom-full left-0 mb-2 w-44 rounded-2xl border-2 border-[#8B5CF6] bg-black z-10 overflow-hidden" style={{ boxShadow: "0 0 20px rgba(139, 92, 246, 0.3)" }}>
                 <button
                   type="button"
-                  onClick={() => { cameraRef.current?.click(); setAttachOpen(false); }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs tracking-widest text-neon hover:bg-neon hover:text-black transition"
+                  onClick={() => { cameraRef.current?.click(); setMenuOpen(false); }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs tracking-widest text-[#8B5CF6] hover:bg-[#8B5CF6] hover:text-black transition"
                 >
-                  <Camera size={14} /> CAMERA
+                  <Camera size={14} /> Upload Gambar
                 </button>
                 <button
                   type="button"
-                  onClick={() => { fileRef.current?.click(); setAttachOpen(false); }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs tracking-widest text-neon hover:bg-neon hover:text-black transition border-t border-neon/40"
+                  onClick={() => { fileRef.current?.click(); setMenuOpen(false); }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs tracking-widest text-[#8B5CF6] hover:bg-[#8B5CF6] hover:text-black transition border-t border-[#8B5CF6]/40"
                 >
-                  <Paperclip size={14} /> FILE
+                  <Paperclip size={14} /> Upload File
                 </button>
               </div>
             )}
+
+            {/* Hidden File Inputs */}
             <input
               ref={cameraRef}
               type="file"
@@ -400,35 +403,43 @@ function ChatPage() {
               className="hidden"
               onChange={onFiles}
             />
+
+            {/* Plus Button */}
             <button
               type="button"
-              onClick={() => setAttachOpen((v) => !v)}
-              className="p-1 text-neutral-400 hover:text-neon transition"
-              aria-label="attach"
+              onClick={() => setMenuOpen((v) => !v)}
+              className="w-5 h-5 flex items-center justify-center rounded-full hover:scale-110 transition"
+              style={{ backgroundColor: "#8B5CF6", color: "black" }}
+              aria-label="menu"
             >
-              <Search size={18} />
+              <Plus size={16} strokeWidth={3} />
             </button>
+
+            {/* Attachments Counter */}
             {attachments.length > 0 && (
-              <div className="flex items-center gap-1 text-[10px] text-neon/70">
+              <div className="flex items-center gap-1 text-[10px] text-[#8B5CF6]/70">
                 {attachments.length} file{attachments.length > 1 ? "s" : ""}
-                <button type="button" onClick={() => setAttachments([])} className="text-neon/50 hover:text-neon ml-1">×</button>
+                <button type="button" onClick={() => setAttachments([])} className="text-[#8B5CF6]/50 hover:text-[#8B5CF6] ml-1">×</button>
               </div>
             )}
+
+            {/* Input Message */}
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={imageMode ? "Describe the image you want..." : "Message Infinity AI..."}
+              placeholder="Message Infinity AI..."
               disabled={sending}
-              className="flex-1 min-w-0 bg-transparent text-neon text-sm outline-none placeholder:text-neutral-500 caret-neon py-2"
+              className="flex-1 min-w-0 bg-transparent text-neon text-sm outline-none placeholder:text-neutral-500 caret-[#8B5CF6] py-2"
             />
+
+            {/* Send Button */}
             <button
               type="submit"
               disabled={(!input.trim() && attachments.length === 0) || sending}
-              className="p-2 rounded-full text-neon hover:bg-neon/10 disabled:opacity-40 transition"
+              className="p-2 rounded-full hover:bg-[#8B5CF6]/10 disabled:opacity-40 transition"
               aria-label="send"
-              style={{ color: "var(--neon)" }}
             >
-              <Send size={18} />
+              <Send size={18} color="#8B5CF6" />
             </button>
           </div>
         </form>

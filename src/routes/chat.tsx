@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip, Settings, Loader2 } from "lucide-react";
+import { Plus, Send, LogOut, Menu, Trash2, MessageSquare, Camera, Paperclip, Settings, Loader2, Search } from "lucide-react";
 import { RenderMessage } from "@/components/CodeBlock";
 import { SettingsModal } from "@/components/SettingsModal";
 
@@ -354,9 +354,9 @@ function ChatPage() {
           onSubmit={(e) => { e.preventDefault(); send(); }}
           className="border-t-2 border-neon p-3 sm:p-4"
         >
-          <div className="relative flex items-center gap-2 border-2 border-neon bg-black px-2 py-1" style={{ boxShadow: "var(--shadow-neon-sm)" }}>
+          <div className="relative flex items-center gap-2 rounded-full bg-[#1F1F1F] border border-transparent pl-4 pr-2 py-1">
             {attachOpen && (
-              <div className="absolute bottom-full left-0 mb-2 w-44 border-2 border-neon bg-black z-10" style={{ boxShadow: "var(--shadow-neon)" }}>
+              <div className="absolute bottom-full left-0 mb-2 w-44 rounded-2xl border-2 border-neon bg-black z-10 overflow-hidden" style={{ boxShadow: "var(--shadow-neon)" }}>
                 <button
                   type="button"
                   onClick={() => { cameraRef.current?.click(); setAttachOpen(false); }}
@@ -391,10 +391,10 @@ function ChatPage() {
             <button
               type="button"
               onClick={() => setAttachOpen((v) => !v)}
-              className="p-2 text-neon hover:bg-neon/10"
+              className="p-1 text-neutral-400 hover:text-neon transition"
               aria-label="attach"
             >
-              <Plus size={18} />
+              <Search size={18} />
             </button>
             {attachments.length > 0 && (
               <div className="flex items-center gap-1 text-[10px] text-neon/70">
@@ -405,15 +405,16 @@ function ChatPage() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={imageMode ? "Describe the image you want..." : "type a message..."}
+              placeholder={imageMode ? "Describe the image you want..." : "Message Infinity AI..."}
               disabled={sending}
-              className="flex-1 bg-transparent text-neon text-sm outline-none placeholder:text-neon/40 caret-neon py-2"
+              className="flex-1 min-w-0 bg-transparent text-neon text-sm outline-none placeholder:text-neutral-500 caret-neon py-2"
             />
             <button
               type="submit"
               disabled={(!input.trim() && attachments.length === 0) || sending}
-              className="p-2 text-neon hover:bg-neon hover:text-black disabled:opacity-40 transition"
+              className="p-2 rounded-full text-neon hover:bg-neon/10 disabled:opacity-40 transition"
               aria-label="send"
+              style={{ color: "var(--neon)" }}
             >
               <Send size={18} />
             </button>

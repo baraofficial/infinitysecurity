@@ -215,21 +215,21 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={disabled}
-            className="flex items-center gap-1 text-[10px] tracking-widest px-3 py-1 transition disabled:opacity-40"
-            style={{ border: `1px solid ${accent}`, color: accent }}
+            className="flex items-center gap-2 text-[10px] tracking-widest transition disabled:opacity-40"
+            style={{ border: `1px solid ${accent}`, color: accent, borderRadius: 9999, padding: "12px 20px", background: "transparent" }}
           >
             <Upload size={12} /> UPLOAD PHOTO
           </button>
         </div>
 
         <label className="block mb-2">
-          <span className="block text-[10px] tracking-widest mb-1">&gt; USERNAME</span>
+          <span className="block text-[10px] tracking-widest mb-1 px-2">&gt; USERNAME</span>
           <input
             value={username}
             onChange={(e) => { setUsername(e.target.value); setError(""); }}
             disabled={disabled}
-            className="w-full bg-black px-3 py-2 outline-none text-sm disabled:opacity-50"
-            style={{ border: `2px solid ${accent}99`, color: accent, caretColor: accent }}
+            className="w-full outline-none text-sm disabled:opacity-50"
+            style={{ border: `1px solid ${accent}`, color: accent, caretColor: accent, background: "#1F1F1F", borderRadius: 9999, padding: "12px 20px" }}
           />
           <span className="block text-[9px] opacity-50 mt-1">Unique username</span>
         </label>

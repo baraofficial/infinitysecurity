@@ -198,7 +198,7 @@ function ChatPage() {
     <div className="flex h-screen bg-black text-neon font-mono overflow-hidden">
       {/* Sidebar */}
       <aside
-        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:static z-30 top-0 left-0 h-full w-72 bg-black border-r-2 border-neon flex flex-col transition-transform`}
+        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:static z-30 top-0 left-0 h-full w-72 bg-black border-r-2 border-neon flex flex-col transition-[...]
         style={{ boxShadow: sidebarOpen ? "var(--shadow-neon)" : undefined }}
       >
         <div className="p-4 border-b-2 border-neon/60">
@@ -262,14 +262,21 @@ function ChatPage() {
 
       {/* Main */}
       <main className="flex-1 flex flex-col min-w-0">
-        <header className="border-b-2 border-neon flex items-center gap-3 px-4 py-3">
-          <button className="md:hidden text-neon" onClick={() => setSidebarOpen(true)} aria-label="menu">
-            <Menu size={18} />
-          </button>
-          <div className="text-xs tracking-[0.3em] text-neon" style={{ textShadow: "0 0 8px var(--neon)" }}>
-            INFINITY AI
+        <div className="flex flex-col">
+          {/* Kapsul Header */}
+          <div className="flex items-center justify-center gap-3 px-6 py-4 mx-4 mt-4 bg-[#1F1F1F] border border-[#8B5CF6] rounded-full">
+            {/* Icon Menu */}
+            <span className="text-[#8B5CF6] text-xl">☰</span>
+            
+            {/* Teks INFINITY AI */}
+            <h1 className="text-[#8B5CF6] text-sm font-bold tracking-widest">
+              INFINITY AI
+            </h1>
           </div>
-        </header>
+
+          {/* Garis Ungu Separator */}
+          <div className="h-[2px] bg-[#8B5CF6] w-full mt-2"></div>
+        </div>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
           {messages.length === 0 && !sending && (

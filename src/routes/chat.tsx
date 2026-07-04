@@ -267,7 +267,7 @@ function ChatPage() {
             <Menu size={18} />
           </button>
           <div className="text-xs tracking-[0.3em] text-neon" style={{ textShadow: "0 0 8px var(--neon)" }}>
-            INFINITY AI <span className="text-neon/50">[ PREMIUM AI ]</span>
+            INFINITY AI
           </div>
         </header>
 
@@ -287,11 +287,16 @@ function ChatPage() {
           {messages.map((m) => (
             <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-[85%] sm:max-w-[70%] px-4 py-3 border text-sm leading-relaxed rounded-2xl ${
+                className={`max-w-[85%] sm:max-w-[70%] text-sm leading-relaxed ${
                   m.role === "user"
-                    ? "border-neon bg-neon/10 text-neon rounded-tr-sm"
-                    : "border-neon/40 bg-black text-neon/90 rounded-tl-sm"
+                    ? "px-4 py-3 border border-neon bg-neon/10 text-neon rounded-2xl rounded-tr-sm"
+                    : "px-5 py-4 text-neon/90 rounded-[20px]"
                 }`}
+                style={
+                  m.role === "assistant"
+                    ? { border: "1px solid #8B5CF6", backgroundColor: "rgba(139,92,246,0.05)" }
+                    : undefined
+                }
               >
                 <div className="text-[9px] tracking-widest text-neon/60 mb-1">
                   {m.role === "user" ? `> ${username}` : "> infinity"}

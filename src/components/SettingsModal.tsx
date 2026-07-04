@@ -249,21 +249,21 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
           <button
             onClick={() => setConfirm({ action: doLogOut })}
             disabled={disabled}
-            className="w-full flex items-center justify-center gap-2 py-2 text-xs tracking-widest transition disabled:opacity-40"
-            style={{ border: `1px solid ${accent}`, color: accent }}
+            className="w-full flex items-center justify-center gap-2 text-xs tracking-widest transition disabled:opacity-40"
+            style={{ border: `1px solid ${accent}`, color: accent, borderRadius: 9999, padding: "12px 20px", background: "transparent" }}
           >
             <LogOut size={14} /> LOG OUT
           </button>
           <button
             onClick={() => setConfirm({ action: doClearChat })}
             disabled={disabled}
-            className="w-full flex items-center justify-center gap-2 py-2 text-xs tracking-widest transition disabled:opacity-40"
-            style={{ border: `1px solid ${accent}`, color: accent }}
+            className="w-full flex items-center justify-center gap-2 text-xs tracking-widest transition disabled:opacity-40"
+            style={{ border: `1px solid ${accent}`, color: accent, borderRadius: 9999, padding: "12px 20px", background: "transparent" }}
           >
             <Trash2 size={14} /> CLEAR CHAT
           </button>
           <div
-            className="flex items-center justify-between text-[10px] tracking-widest pt-1 opacity-80"
+            className="flex items-center justify-between text-[10px] tracking-widest pt-1 px-2 opacity-80"
             style={{ color: accent }}
           >
             <span>&gt; CACHE</span>
@@ -272,8 +272,8 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
           <button
             onClick={() => setConfirm({ action: doClearCache })}
             disabled={disabled}
-            className="w-full flex items-center justify-center gap-2 py-2 text-xs tracking-widest transition disabled:opacity-40"
-            style={{ border: `1px solid ${accent}`, color: accent }}
+            className="w-full flex items-center justify-center gap-2 text-xs tracking-widest transition disabled:opacity-40"
+            style={{ border: `1px solid ${accent}`, color: accent, borderRadius: 9999, padding: "12px 20px", background: "transparent" }}
           >
             <Database size={14} /> CLEAR CACHE
           </button>
@@ -285,8 +285,8 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
             disabled={disabled}
             className="flex-1 text-xs tracking-widest font-bold transition disabled:opacity-40"
             style={{
-              padding: "12px",
-              borderRadius: "8px",
+              padding: "12px 20px",
+              borderRadius: 9999,
               background: "transparent",
               border: `1px solid ${accent}`,
               color: accent,
@@ -299,15 +299,15 @@ export function SettingsModal({ open, onClose }: { open: boolean; onClose: () =>
             disabled={disabled}
             className="flex-1 flex items-center justify-center gap-2 text-xs tracking-widest font-bold transition disabled:opacity-60"
             style={{
-              padding: "12px",
-              borderRadius: "8px",
+              padding: "12px 20px",
+              borderRadius: 9999,
               background: accent,
-              color: "#000",
+              color: "#fff",
               boxShadow: `0 0 12px ${accent}88`,
             }}
           >
             {saving ? (
-              <Loader2 size={16} className="animate-spin" style={{ color: "#000" }} />
+              <Loader2 size={16} className="animate-spin" style={{ color: "#fff" }} />
             ) : (
               <>
                 <Save size={14} /> SAVE

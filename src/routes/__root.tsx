@@ -8,6 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import Header from "../Header";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -61,8 +62,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: "INFINITY AI" },
       { property: "og:description", content: "BARA Official V1 — Wide Edition. Cyberpunk AI chat." },
       { name: "twitter:description", content: "BARA Official V1 — Wide Edition. Cyberpunk AI chat." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dd826bdf-0a69-4992-a6e7-02c3baf1ecdc/id-preview-17f842ea--c1cd8b73-8768-402e-982b-9c61d068ecad.lovable.app-1782658218731.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dd826bdf-0a69-4992-a6e7-02c3baf1ecdc/id-preview-17f842ea--c1cd8b73-8768-402e-982b-9c61d068ecad.lovable.app-1782658218731.png" },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dd826bdf-0a69-4992-a6e7-02c3baf1ecdc/id-preview-17f842ea--c1cd8b73-8768-402e-982b-9c61d068ecad.lovable.a[...]
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dd826bdf-0a69-4992-a6e7-02c3baf1ecdc/id-preview-17f842ea--c1cd8b73-8768-402e-982b-9c61d068ecad.lovable.[...]
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
     ],
@@ -79,7 +80,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-const THEME_INIT_SCRIPT = `(function(){try{var m={purple:'#a855f7',green:'#22c55e',blue:'#3b82f6'};var d={purple:'#6b21a8',green:'#15803d',blue:'#1d4ed8'};var t=localStorage.getItem('theme');if(!m[t])t='purple';var c=m[t],x=d[t],r=document.documentElement.style;r.setProperty('--accent-color',c);r.setProperty('--neon',c);r.setProperty('--neon-dim',x);r.setProperty('--primary',c);r.setProperty('--ring',c);r.setProperty('--border',c);r.setProperty('--shadow-neon','0 0 12px '+c+'99');r.setProperty('--shadow-neon-sm','0 0 6px '+c+'66');}catch(e){}})();`;
+const THEME_INIT_SCRIPT = `(function(){try{var m={purple:'#a855f7',green:'#22c55e',blue:'#3b82f6'};var d={purple:'#6b21a8',green:'#15803d',blue:'#1d4ed8'};var t=localStorage.getItem('theme');if(!m[...]
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
@@ -103,6 +104,7 @@ function RootComponent() {
   useEffect(() => { initThemeFromStorage(); }, []);
   return (
     <QueryClientProvider client={queryClient}>
+      <Header />
       <Outlet />
       <Toaster theme="dark" />
     </QueryClientProvider>

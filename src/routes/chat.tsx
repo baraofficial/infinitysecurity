@@ -263,19 +263,28 @@ function ChatPage() {
       {/* Main */}
       <main className="flex-1 flex flex-col min-w-0">
         <div className="flex flex-col">
-          {/* Kapsul Header */}
-          <div className="flex items-center justify-center gap-3 px-6 py-4 mx-4 mt-4 bg-[#1F1F1F] border border-[#8B5CF6] rounded-full">
-            {/* Icon Menu */}
-            <span className="text-[#8B5CF6] text-xl">☰</span>
-            
-            {/* Teks INFINITY AI */}
-            <h1 className="text-[#8B5CF6] text-sm font-bold tracking-widest">
-              INFINITY AI
-            </h1>
+          {/* Header capsules */}
+          <div className="flex items-center justify-center gap-2 px-4 mt-4">
+            {/* Hamburger square capsule */}
+            <button
+              type="button"
+              onClick={() => setSidebarOpen((v) => !v)}
+              aria-label="menu"
+              className="shrink-0 h-11 w-11 flex items-center justify-center bg-[#1F1F1F] border border-[#8B5CF6] rounded-2xl hover:bg-[#8B5CF6]/10 transition"
+            >
+              <Menu size={20} className="text-[#8B5CF6]" />
+            </button>
+
+            {/* INFINITY AI capsule */}
+            <div className="flex-1 max-w-xs flex items-center justify-center px-6 py-3 bg-[#1F1F1F] border border-[#8B5CF6] rounded-full">
+              <h1 className="text-[#8B5CF6] text-sm font-bold tracking-widest text-center">
+                INFINITY AI
+              </h1>
+            </div>
           </div>
 
-          {/* Garis Ungu Separator */}
-          <div className="h-[2px] bg-[#8B5CF6] w-full mt-2"></div>
+          {/* Separator */}
+          <div className="h-[2px] bg-[#8B5CF6] w-full mt-4"></div>
         </div>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-4">

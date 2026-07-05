@@ -198,7 +198,7 @@ function ChatPage() {
     <div className="flex h-screen bg-black text-neon font-mono overflow-hidden">
       {/* Sidebar */}
       <aside
-        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:static z-30 top-0 left-0 h-full w-72 bg-black border-r-2 border-neon flex flex-col transition-[...]
+        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:static z-30 top-0 left-0 h-full w-72 bg-black border-r-2 border-neon flex flex-col transition-transform`}
         style={{ boxShadow: sidebarOpen ? "var(--shadow-neon)" : undefined }}
       >
         <div className="p-4 border-b-2 border-neon/60">

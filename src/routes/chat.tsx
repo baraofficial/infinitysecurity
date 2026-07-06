@@ -391,7 +391,7 @@ function ChatPage() {
           onSubmit={(e) => { e.preventDefault(); send(); }}
           className="border-t-2 border-neon p-3 sm:p-4"
         >
-          <div className="relative flex items-center gap-2 rounded-full bg-[#1F1F1F] border border-[#8B5CF6] pl-2 pr-2 py-1">
+          <div className="relative flex items-end gap-2 rounded-3xl bg-[#1F1F1F] border border-[#8B5CF6] pl-2 pr-2 py-1">
             {/* Menu Dropdown */}
             {menuOpen && (
               <div className="absolute bottom-full left-0 mb-2 w-44 rounded-2xl border-2 border-[#8B5CF6] bg-black z-10 overflow-hidden" style={{ boxShadow: "0 0 20px rgba(139, 92, 246, 0.3)" }}>

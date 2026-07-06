@@ -102,7 +102,7 @@ function RootComponent() {
   useEffect(() => { initThemeFromStorage(); }, []);
   return (
     <QueryClientProvider client={queryClient}>
-      <Header />
+      
       <Outlet />
       <Toaster theme="dark" />
     </QueryClientProvider>

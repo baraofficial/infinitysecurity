@@ -8,7 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-import Header from "../Header";
+
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -62,8 +62,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: "INFINITY AI" },
       { property: "og:description", content: "BARA Official V1 — Wide Edition. Cyberpunk AI chat." },
       { name: "twitter:description", content: "BARA Official V1 — Wide Edition. Cyberpunk AI chat." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dd826bdf-0a69-4992-a6e7-02c3baf1ecdc/id-preview-17f842ea--c1cd8b73-8768-402e-982b-9c61d068ecad.lovable.a[...]
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dd826bdf-0a69-4992-a6e7-02c3baf1ecdc/id-preview-17f842ea--c1cd8b73-8768-402e-982b-9c61d068ecad.lovable.[...]
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
     ],
@@ -80,7 +78,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-const THEME_INIT_SCRIPT = `(function(){try{var m={purple:'#a855f7',green:'#22c55e',blue:'#3b82f6'};var d={purple:'#6b21a8',green:'#15803d',blue:'#1d4ed8'};var t=localStorage.getItem('theme');if(!m[...]
+const THEME_INIT_SCRIPT = `(function(){try{var m={purple:'#a855f7',green:'#22c55e',blue:'#3b82f6'};var d={purple:'#6b21a8',green:'#15803d',blue:'#1d4ed8'};var t=localStorage.getItem('theme');if(!m[t])t='purple';var r=document.documentElement;r.style.setProperty('--accent-color',m[t]);r.style.setProperty('--neon',m[t]);r.style.setProperty('--neon-dim',d[t]);r.style.setProperty('--primary',m[t]);r.style.setProperty('--ring',m[t]);r.style.setProperty('--border',m[t]);}catch(e){}})();`;
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
@@ -104,7 +102,7 @@ function RootComponent() {
   useEffect(() => { initThemeFromStorage(); }, []);
   return (
     <QueryClientProvider client={queryClient}>
-      <Header />
+      
       <Outlet />
       <Toaster theme="dark" />
     </QueryClientProvider>

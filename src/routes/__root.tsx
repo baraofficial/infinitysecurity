@@ -62,8 +62,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: "INFINITY AI" },
       { property: "og:description", content: "BARA Official V1 — Wide Edition. Cyberpunk AI chat." },
       { name: "twitter:description", content: "BARA Official V1 — Wide Edition. Cyberpunk AI chat." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dd826bdf-0a69-4992-a6e7-02c3baf1ecdc/id-preview-17f842ea--c1cd8b73-8768-402e-982b-9c61d068ecad.lovable.a[...]
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/dd826bdf-0a69-4992-a6e7-02c3baf1ecdc/id-preview-17f842ea--c1cd8b73-8768-402e-982b-9c61d068ecad.lovable.[...]
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
     ],

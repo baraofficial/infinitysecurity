@@ -276,15 +276,12 @@ function ChatPage() {
             </button>
 
             {/* INFINITY AI capsule */}
-            <div className="flex-1 max-w-xs flex items-center justify-center px-6 py-3 bg-[#1F1F1F] border border-[#8B5CF6] rounded-full">
-              <h1 className="text-[#8B5CF6] text-sm font-bold tracking-widest text-center">
+            <div className="inline-flex items-center justify-center px-5 py-3 bg-[#1F1F1F] border border-[#8B5CF6] rounded-full">
+              <h1 className="text-[#8B5CF6] text-sm font-bold tracking-widest text-center whitespace-nowrap">
                 INFINITY AI
               </h1>
             </div>
           </div>
-
-          {/* Separator */}
-          <div className="h-[2px] bg-[#8B5CF6] w-full mt-4"></div>
         </div>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-4">

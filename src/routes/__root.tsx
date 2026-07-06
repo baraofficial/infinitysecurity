@@ -78,7 +78,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-const THEME_INIT_SCRIPT = `(function(){try{var m={purple:'#a855f7',green:'#22c55e',blue:'#3b82f6'};var d={purple:'#6b21a8',green:'#15803d',blue:'#1d4ed8'};var t=localStorage.getItem('theme');if(!m[...]
+const THEME_INIT_SCRIPT = `(function(){try{var m={purple:'#a855f7',green:'#22c55e',blue:'#3b82f6'};var d={purple:'#6b21a8',green:'#15803d',blue:'#1d4ed8'};var t=localStorage.getItem('theme');if(!m[t])t='purple';var r=document.documentElement;r.style.setProperty('--accent-color',m[t]);r.style.setProperty('--neon',m[t]);r.style.setProperty('--neon-dim',d[t]);r.style.setProperty('--primary',m[t]);r.style.setProperty('--ring',m[t]);r.style.setProperty('--border',m[t]);}catch(e){}})();`;
 
 function RootShell({ children }: { children: ReactNode }) {
   return (

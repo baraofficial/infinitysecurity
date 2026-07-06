@@ -449,12 +449,20 @@ function ChatPage() {
             )}
 
             {/* Input Message */}
-            <input
+            <textarea
+              ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  send();
+                }
+              }}
               placeholder="Message Infinity AI..."
               disabled={sending}
-              className="flex-1 min-w-0 bg-transparent text-neon text-sm outline-none placeholder:text-neutral-500 caret-[#8B5CF6] py-2"
+              rows={1}
+              className="flex-1 min-w-0 bg-transparent text-neon text-sm outline-none placeholder:text-neutral-500 caret-[#8B5CF6] py-2 resize-none leading-5 max-h-[100px]"
             />
 
             {/* Send Button */}

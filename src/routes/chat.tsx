@@ -53,6 +53,19 @@ function ChatPage() {
   const cameraRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  function autoResize() {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    ta.style.height = "auto";
+    const lineHeight = 20;
+    const maxHeight = lineHeight * 5;
+    ta.style.height = Math.min(ta.scrollHeight, maxHeight) + "px";
+    ta.style.overflowY = ta.scrollHeight > maxHeight ? "auto" : "hidden";
+  }
+
+  useEffect(() => { autoResize(); }, [input]);
 
   function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -264,7 +277,7 @@ function ChatPage() {
       <main className="flex-1 flex flex-col min-w-0">
         <div className="flex flex-col">
           {/* Header capsules */}
-          <div className="flex items-center justify-center gap-6 px-4 mt-4">
+          <div className="flex items-center justify-center gap-12 sm:gap-16 px-4 mt-4">
             {/* Hamburger square capsule */}
             <button
               type="button"
@@ -378,7 +391,7 @@ function ChatPage() {
           onSubmit={(e) => { e.preventDefault(); send(); }}
           className="border-t-2 border-neon p-3 sm:p-4"
         >
-          <div className="relative flex items-center gap-2 rounded-full bg-[#1F1F1F] border border-[#8B5CF6] pl-2 pr-2 py-1">
+          <div className="relative flex items-end gap-2 rounded-3xl bg-[#1F1F1F] border border-[#8B5CF6] pl-2 pr-2 py-1">
             {/* Menu Dropdown */}
             {menuOpen && (
               <div className="absolute bottom-full left-0 mb-2 w-44 rounded-2xl border-2 border-[#8B5CF6] bg-black z-10 overflow-hidden" style={{ boxShadow: "0 0 20px rgba(139, 92, 246, 0.3)" }}>
@@ -436,12 +449,20 @@ function ChatPage() {
             )}
 
             {/* Input Message */}
-            <input
+            <textarea
+              ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  send();
+                }
+              }}
               placeholder="Message Infinity AI..."
               disabled={sending}
-              className="flex-1 min-w-0 bg-transparent text-neon text-sm outline-none placeholder:text-neutral-500 caret-[#8B5CF6] py-2"
+              rows={1}
+              className="flex-1 min-w-0 bg-transparent text-neon text-sm outline-none placeholder:text-neutral-500 caret-[#8B5CF6] py-2 resize-none leading-5 max-h-[100px]"
             />
 
             {/* Send Button */}

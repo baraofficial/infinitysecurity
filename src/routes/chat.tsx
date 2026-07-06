@@ -264,7 +264,7 @@ function ChatPage() {
       <main className="flex-1 flex flex-col min-w-0">
         <div className="flex flex-col">
           {/* Header capsules */}
-          <div className="flex items-center justify-center gap-6 px-4 mt-4">
+          <div className="flex items-center justify-center gap-12 sm:gap-16 px-4 mt-4">
             {/* Hamburger square capsule */}
             <button
               type="button"

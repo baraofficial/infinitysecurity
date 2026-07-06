@@ -264,7 +264,7 @@ function ChatPage() {
       <main className="flex-1 flex flex-col min-w-0">
         <div className="flex flex-col">
           {/* Header capsules */}
-          <div className="flex items-center justify-center gap-2 px-4 mt-4">
+          <div className="flex items-center justify-center gap-6 px-4 mt-4">
             {/* Hamburger square capsule */}
             <button
               type="button"
@@ -275,13 +275,19 @@ function ChatPage() {
               <Menu size={20} className="text-[#8B5CF6]" />
             </button>
 
-            {/* INFINITY AI capsule */}
-            <div className="inline-flex items-center justify-center px-5 py-3 bg-[#1F1F1F] border border-[#8B5CF6] rounded-full">
-              <h1 className="text-[#8B5CF6] text-sm font-bold tracking-widest text-center whitespace-nowrap">
-                INFINITY AI
-              </h1>
+            {/* INFINITY AI marquee capsule */}
+            <div className="inline-flex items-center overflow-hidden w-48 sm:w-64 px-5 py-3 bg-[#1F1F1F] border border-[#8B5CF6] rounded-full">
+              <div className="flex whitespace-nowrap animate-marquee">
+                <span className="text-[#8B5CF6] text-sm font-bold tracking-widest pr-12">
+                  INFINITY AI V 24.08 by Bara Official
+                </span>
+                <span className="text-[#8B5CF6] text-sm font-bold tracking-widest pr-12" aria-hidden="true">
+                  INFINITY AI V 24.08 by Bara Official
+                </span>
+              </div>
             </div>
           </div>
+
         </div>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-4">

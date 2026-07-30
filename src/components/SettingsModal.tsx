@@ -9,6 +9,7 @@ interface SettingsModalProps {
   onUploadPhoto: (file: File) => void;
   onLogout: () => void;
   onClearChat: () => void;
+  onSystemPrompt:() => void;
 }
 
 export default function SettingsModal({
@@ -19,6 +20,7 @@ export default function SettingsModal({
   onUploadPhoto,
   onLogout,
   onClearChat,
+  onSystemPrompt,
 }: SettingsModalProps) {
   const [tempUsername, setTempUsername] = useState(username);
   const [systemPrompt, setSystemPrompt] = useState<string>("");

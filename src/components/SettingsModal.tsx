@@ -1,293 +1,117 @@
-import { useEffect, useRef, useState } from "react";
-import { X, Upload, LogOut, Trash2, Database, Save, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
+import { useState, useEffect } from 'react';
+import { X, Upload, Trash2, LogOut, User } from 'lucide-react';
 
-import { applyTheme } from "@/lib/theme";
-
-const ACCENT = "#a855f7";
-
-type ConfirmCfg = { title?: string; action: () => void } | null;
-
-const PROTECTED_KEYS = new Set([
-  "currentUser",
-  "profilePhoto",
-  "theme",
-  "registeredUsers",
-  "chatHistory",
-]);
-
-function formatBytes(n: number): string {
-  if (!n || n < 1024) return `${n} B`;
-  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
-  return `${(n / (1024 * 1024)).toFixed(2)} MB`;
+interface SettingsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  username: string;
+  onUsernameChange: (name: string) => void;
+  onUploadPhoto: (file: File) => void;
+  onLogout: () => void;
+  onClearChat: () => void;
 }
 
-async function computeCacheSize(): Promise<number> {
-  let total = 0;
-  try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
-      if (!k || PROTECTED_KEYS.has(k) || k.startsWith("sb-")) continue;
-      total += (k.length + (localStorage.getItem(k) || "").length) * 2;
-    }
-    for (let i = 0; i < sessionStorage.length; i++) {
-      const k = sessionStorage.key(i);
-      if (!k) continue;
-      total += (k.length + (sessionStorage.getItem(k) || "").length) * 2;
-    }
-    if ("caches" in window) {
-      const names = await caches.keys();
-      for (const n of names) {
-        const c = await caches.open(n);
-        const reqs = await c.keys();
-        for (const r of reqs) {
-          const resp = await c.match(r);
-          const buf = await resp?.clone().arrayBuffer();
-          if (buf) total += buf.byteLength;
-        }
-      }
-    }
-  } catch {}
-  return total;
-}
+export default function SettingsModal({
+  isOpen,
+  onClose,
+  username,
+  onUsernameChange,
+  onUploadPhoto,
+  onLogout,
+  onClearChat,
+}: SettingsModalProps) {
+  const [tempUsername, setTempUsername] = useState(username);
+  const [systemPrompt, setSystemPrompt] = useState<string>("");
 
-export function SettingsModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const navigate = useNavigate();
-  const [savedPhoto, setSavedPhoto] = useState<string>("");
-  const [savedUsername, setSavedUsername] = useState<string>("");
-  const [photo, setPhoto] = useState<string>("");
-  const [username, setUsername] = useState<string>("");
-  const [systemPrompt, setSystemPrompt] = useState<string>(""); // <-- TAMBAH INI
-  const [error, setError] = useState<string>("");
-  const [saving, setSaving] = useState(false);
-  const [confirm, setConfirm] = useState<ConfirmCfg>(null);
-  const [cacheSize, setCacheSize] = useState<string>("—");
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const accent = ACCENT;
-
+  // Load data dari localStorage pas modal dibuka
   useEffect(() => {
-    if (!open) return;
-    const p = localStorage.getItem("profilePhoto") || "";
-    const u = localStorage.getItem("currentUser") || "";
-    const sp = localStorage.getItem("systemPrompt") || "Kamu adalah Infinity AI. Jawab dengan ramah, singkat, dan membantu."; // <-- TAMBAH INI
-    setSavedPhoto(p); setPhoto(p);
-    setSavedUsername(u); setUsername(u);
-    setSystemPrompt(sp); // <-- TAMBAH INI
-    setError("");
-    setSaving(false);
-    setConfirm(null);
-    setCacheSize("…");
-    computeCacheSize().then((n) => setCacheSize(formatBytes(n)));
-  }, [open]);
-
-  useEffect(() => {
-    localStorage.setItem("theme", "purple");
-    applyTheme("purple");
-  }, []);
-
-  if (!open) return null;
-
-  function onPick(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    const r = new FileReader();
-    r.onload = () => setPhoto(String(r.result));
-    r.readAsDataURL(f);
-  }
-
-  function handleSave() {
-    const trimmed = username.trim();
-    if (!trimmed) { setError("Username cannot be empty"); return; }
-    if (trimmed!== savedUsername) {
-      const raw = localStorage.getItem("registeredUsers");
-      let list: string[] = [];
-      try { list = raw? JSON.parse(raw) : []; } catch { list = []; }
-      if (list.includes(trimmed)) { setError("Username is already in use"); return; }
+    if (isOpen) {
+      setTempUsername(username);
+      const sp = localStorage.getItem("systemPrompt") || "Kamu adalah Infinity AI, asisten AI yang membantu dan ramah.";
+      setSystemPrompt(sp);
     }
-    setSaving(true);
-    setTimeout(() => {
-      if (trimmed!== savedUsername) {
-        const raw = localStorage.getItem("registeredUsers");
-        let list: string[] = [];
-        try { list = raw? JSON.parse(raw) : []; } catch { list = []; }
-        list = list.filter((u) => u!== savedUsername);
-        list.push(trimmed);
-        localStorage.setItem("registeredUsers", JSON.stringify(list));
-      }
-      localStorage.setItem("currentUser", trimmed);
-      localStorage.setItem("theme", "purple");
-      localStorage.setItem("systemPrompt", systemPrompt); // <-- TAMBAH INI
-      applyTheme("purple");
-      if (photo) localStorage.setItem("profilePhoto", photo);
-      toast.success("✓ Saved!", {
-        duration: 1500,
-        style: { background: "#0a0a0a", color: "#22c55e", border: "1px solid #22c55e" },
-      });
-      setSaving(false);
-      setTimeout(() => onClose(), 1500);
-    }, 500);
-  }
+  }, [isOpen, username]);
 
-  function handleCancel() {
-    if (saving) return;
-    setPhoto(savedPhoto);
-    setUsername(savedUsername);
-    setError("");
+  const handleSave = () => {
+    onUsernameChange(tempUsername);
+    localStorage.setItem("systemPrompt", systemPrompt); // SIMPAN SYSTEM PROMPT
     onClose();
-  }
+  };
 
-  async function doLogOut() {
-    localStorage.removeItem("currentUser");
-    await supabase.auth.signOut();
-    navigate({ to: "/auth" });
-  }
-  function doClearChat() {
-    localStorage.removeItem("chatHistory");
-    window.location.reload();
-  }
-  async function doClearCache() {
-    try {
-      const toRemove: string[] = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (!k) continue;
-        if (PROTECTED_KEYS.has(k) || k.startsWith("sb-")) continue;
-        toRemove.push(k);
-      }
-      toRemove.forEach((k) => localStorage.removeItem(k));
-      sessionStorage.clear();
-      if ("caches" in window) {
-        const names = await caches.keys();
-        await Promise.all(names.map((n) => caches.delete(n)));
-      }
-    } catch {}
-    toast.success("✓ Cache cleared", {
-      duration: 1500,
-      style: { background: "#0a0a0a", color: "#22c55e", border: "1px solid #22c55e" },
-    });
-    const n = await computeCacheSize();
-    setCacheSize(formatBytes(n));
-  }
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) onUploadPhoto(file);
+  };
 
-  const disabled = saving;
+  if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center px-4"
-      style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
-      onClick={handleCancel}
-    >
-      <div
-        className="w-full max-w-sm rounded-xl p-6 font-mono relative overflow-y-auto max-h-[90vh]" // <-- TAMBAH overflow
-        style={{ background: "#111119", border: `2px solid ${accent}`, boxShadow: `0 0 24px ${accent}66`, color: accent }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          onClick={handleCancel}
-          aria-label="close"
-          disabled={disabled}
-          className="absolute top-3 right-3 hover:opacity-70 disabled:opacity-40"
-          style={{ color: accent }}
-        >
-          <X size={18} />
-        </button>
-
-        <h2 className="text-sm tracking-widest text-center mb-5" style={{ textShadow: `0 0 8px ${accent}` }}>
-          SETTINGS
-        </h2>
-
-        {/*... BAGIAN FOTO DAN USERNAME TETAP... */}
-        <div className="flex flex-col items-center gap-2 mb-5">
-          <div
-            className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center"
-            style={{ border: `2px solid ${accent}`, background: "#000" }}
-          >
-            {photo? (
-              <img src={photo} alt="profile" className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-[10px] opacity-60">NO IMG</span>
-            )}
-          </div>
-          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onPick} disabled={disabled} />
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            disabled={disabled}
-            className="flex items-center gap-2 text-[10px] tracking-widest transition disabled:opacity-40"
-            style={{ border: `1px solid ${accent}`, color: accent, borderRadius: 9999, padding: "12px 20px", background: "transparent" }}
-          >
-            <Upload size={12} /> UPLOAD PHOTO
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-[#1F1F1F] border-2 border-[#8B5CF6] rounded-2xl w-full max-w-md p-6 shadow-[0_0_30px_rgba(139,92,246,0.3)]">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-[#8B5CF6] text-lg font-bold tracking-widest">SETTINGS</h2>
+          <button onClick={onClose} className="text-[#8B5CF6] hover:text-white">
+            <X size={20} />
           </button>
         </div>
 
-        <label className="block mb-2">
-          <span className="block text-[10px] tracking-widest mb-1 px-2">&gt; USERNAME</span>
-          <input
-            value={username}
-            onChange={(e) => { setUsername(e.target.value); setError(""); }}
-            disabled={disabled}
-            className="w-full outline-none text-sm disabled:opacity-50"
-            style={{ border: `1px solid ${accent}`, color: accent, caretColor: accent, background: "#1F1F1F", borderRadius: 9999, padding: "12px 20px" }}
-          />
-          <span className="block text-[9px] opacity-50 mt-1">Unique username</span>
-        </label>
+        {/* Username */}
+        <div className="mb-4">
+          <label className="text-xs text-[#8B5CF6] tracking-widest mb-2 block">USERNAME</label>
+          <div className="flex items-center gap-2 bg-black border border-[#8B5CF6] rounded-xl px-3 py-2">
+            <User size={16} className="text-[#8B5CF6]" />
+            <input
+              value={tempUsername}
+              onChange={(e) => setTempUsername(e.target.value)}
+              className="bg-transparent outline-none text-white text-sm w-full"
+            />
+          </div>
+        </div>
 
-        {/* INI BAGIAN BARU SYSTEM PROMPT */}
-        <label className="block mb-4 mt-4">
-          <span className="block text-[10px] tracking-widest mb-1 px-2">&gt; SYSTEM PROMPT</span>
+        {/* SYSTEM PROMPT BARU */}
+        <div className="mb-4">
+          <label className="text-xs text-[#8B5CF6] tracking-widest mb-2 block">SYSTEM PROMPT</label>
           <textarea
             value={systemPrompt}
             onChange={(e) => setSystemPrompt(e.target.value)}
-            disabled={disabled}
             rows={4}
-            className="w-full outline-none text-sm disabled:opacity-50 resize-none"
-            style={{ border: `1px solid ${accent}`, color: accent, caretColor: accent, background: "#1F1F1F", borderRadius: "12px", padding: "12px 16px" }}
-            placeholder="Atur kepribadian AI..."
+            className="w-full bg-black border-[#8B5CF6] rounded-xl px-3 py-2 text-white text-sm outline-none resize-none"
+            placeholder="Atur kepribadian AI di sini..."
           />
-          <span className="block text-[9px] opacity-50 mt-1">Akan mempengaruhi semua chat baru</span>
-        </label>
+        </div>
 
-        {error && (
-          <div
-            className="text-[10px] tracking-widest px-3 py-2 mb-2 rounded"
-            style={{ background: "#3b0a0a", border: "1px solid #ef4444", color: "#fca5a5" }}
-          >
-            ⚠ {error}
-          </div>
-        )}
+        {/* Upload Photo */}
+        <div className="mb-4">
+          <label className="text-xs text-[#8B5CF6] tracking-widest mb-2 block">PROFILE PHOTO</label>
+          <label className="flex items-center justify-center gap-2 bg-black border border-dashed border-[#8B5CF6] rounded-xl px-3 py-3 cursor-pointer hover:bg-[#8B5CF6]/10">
+            <Upload size={16} className="text-[#8B5CF6]" />
+            <span className="text-xs text-[#8B5CF6]">Upload Foto</span>
+            <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+          </label>
+        </div>
 
-        <div className="my-4" style={{ borderTop: `1px solid ${accent}66` }} />
-
-        {/*... BAGIAN BUTTON LAIN TETAP... */}
+        {/* Buttons */}
         <div className="space-y-2">
-          <button onClick={() => setConfirm({ action: doLogOut })} disabled={disabled} className="w-full flex items-center justify-center gap-2 text-xs tracking-widest transition disabled:opacity-40" style={{ border: `1px solid ${accent}`, color: accent, borderRadius: 9999, padding: "12px 20px", background: "transparent" }}>
-            <LogOut size={14} /> LOG OUT
+          <button
+            onClick={onClearChat}
+            className="w-full flex items-center justify-center gap-2 bg-black border-red-500 text-red-500 rounded-xl px-3 py-2 text-sm hover:bg-red-500 hover:text-white"
+          >
+            <Trash2 size={16} /> Clear Chat
           </button>
-          <button onClick={() => setConfirm({ action: doClearChat })} disabled={disabled} className="w-full flex items-center justify-center gap-2 text-xs tracking-widest transition disabled:opacity-40" style={{ border: `1px solid ${accent}`, color: accent, borderRadius: 9999, padding: "12px 20px", background: "transparent" }}>
-            <Trash2 size={14} /> CLEAR CHAT
+          <button
+            onClick={onLogout}
+            className="w-full flex items-center justify-center gap-2 bg-black border border-[#8B5CF6] text-[#8B5CF6] rounded-xl px-3 py-2 text-sm hover:bg-[#8B5CF6] hover:text-black"
+          >
+            <LogOut size={16} /> Logout
           </button>
-          <div className="flex items-center justify-between text-[10px] tracking-widest pt-1 px-2 opacity-80" style={{ color: accent }}>
-            <span>&gt; CACHE</span>
-            <span>{cacheSize}</span>
-          </div>
-          <button onClick={() => setConfirm({ action: doClearCache })} disabled={disabled} className="w-full flex items-center justify-center gap-2 text-xs tracking-widest transition disabled:opacity-40" style={{ border: `1px solid ${accent}`, color: accent, borderRadius: 9999, padding: "12px 20px", background: "transparent" }}>
-            <Database size={14} /> CLEAR CACHE
-          </button>
-        </div>
-
-        <div className="flex gap-[10px] mt-4">
-          <button onClick={handleCancel} disabled={disabled} className="flex-1 text-xs tracking-widest font-bold transition disabled:opacity-40" style={{ padding: "12px 20px", borderRadius: 9999, background: "transparent", border: `1px solid ${accent}`, color: accent }}>
-            CANCEL
-          </button>
-          <button onClick={handleSave} disabled={disabled} className="flex-1 flex items-center justify-center gap-2 text-xs tracking-widest font-bold transition disabled:opacity-60" style={{ padding: "12px 20px", borderRadius: 9999, background: accent, color: "#fff", boxShadow: `0 0 12px ${accent}88` }}>
-            {saving? (<Loader2 size={16} className="animate-spin" style={{ color: "#fff" }} />) : (<><Save size={14} /> SAVE</>)}
+          <button
+            onClick={handleSave}
+            className="w-full bg-[#8B5CF6] text-black font-bold rounded-xl px-3 py-2 text-sm mt-2"
+          >
+            SAVE
           </button>
         </div>
-
-        {/*... CONFIRM MODAL TETAP... */}
       </div>
     </div>
   );

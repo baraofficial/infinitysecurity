@@ -173,21 +173,12 @@ function ChatPage() {
         });
         setImageMode(false);
       } else {
-        const history = [...messages, userMsg].map((m) => ({ role: m.role, content: m.content }));
-        const { data: sess } = await supabase.auth.getSession();
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${sess.session?.access_token ?? ""}`,
-          },
-          body: JSON.stringify({ messages: history }),
-        });
-        if (!res.ok) {
-          const t = await res.text();
-          throw new Error(t || "AI request failed");
-        }
-        const { content } = (await res.json()) as { content: string };
+        const history = [...messages, userMsg].map((m) => ({
+  role: m.role,
+  parts: [{ text: m.content }]
+});
+
+const content = await sendMessageToGemini(history);
         const aiMsg: Message = { id: crypto.randomUUID(), role: "assistant", content };
         setMessages((m) => [...m, aiMsg]);
         await supabase.from("messages").insert({

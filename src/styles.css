@@ -31,50 +31,51 @@
   --color-neon: var(--neon);
   --color-neon-dim: var(--neon-dim);
   --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
-  --shadow-neon: 0 0 12px color-mix(in oklab, var(--neon) 60%, transparent);
-  --shadow-neon-sm: 0 0 6px color-mix(in oklab, var(--neon) 40%, transparent);
+  --shadow-neon: none;
+  --shadow-neon-sm: none;
 }
 
 :root {
   --radius: 0.5rem;
-  --neon: oklch(0.68 0.27 305);
-  --neon-dim: oklch(0.45 0.18 305);
-  --background: oklch(0 0 0);
-  --foreground: oklch(0.95 0.02 305);
-  --card: oklch(0.03 0 0);
-  --card-foreground: oklch(0.95 0.02 305);
-  --popover: oklch(0.03 0 0);
-  --popover-foreground: oklch(0.95 0.02 305);
-  --primary: oklch(0.68 0.27 305);
-  --primary-foreground: oklch(0 0 0);
-  --secondary: oklch(0.15 0.05 305);
-  --secondary-foreground: oklch(0.95 0.02 305);
-  --muted: oklch(0.12 0.02 305);
-  --muted-foreground: oklch(0.6 0.1 305);
-  --accent: oklch(0.2 0.08 305);
-  --accent-foreground: oklch(0.95 0.02 305);
-  --destructive: oklch(0.6 0.25 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.45 0.2 305);
-  --input: oklch(0.45 0.2 305);
-  --ring: oklch(0.68 0.27 305);
+  --accent-color: #ef4444;
+  --neon: #ef4444;
+  --neon-dim: #7f1d1d;
+  --background: #0a0a0f;
+  --foreground: #f5f5f5;
+  --card: #12121a;
+  --card-foreground: #f5f5f5;
+  --popover: #12121a;
+  --popover-foreground: #f5f5f5;
+  --primary: #ef4444;
+  --primary-foreground: #000000;
+  --secondary: #1a1a22;
+  --secondary-foreground: #f5f5f5;
+  --muted: #16161d;
+  --muted-foreground: #9ca3af;
+  --accent: #2a1114;
+  --accent-foreground: #f5f5f5;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #ef4444;
+  --input: #ef4444;
+  --ring: #ef4444;
 }
 
 .dark {
-  --background: oklch(0 0 0);
-  --foreground: oklch(0.95 0.02 305);
+  --background: #0a0a0f;
+  --foreground: #f5f5f5;
 }
 
 @layer base {
   * { border-color: var(--color-border); }
   html, body, #root {
-    background-color: var(--color-background);
+    background-color: #0a0a0f;
     color: var(--color-foreground);
     font-family: var(--font-mono);
     min-height: 100%;
   }
   body {
-    background: radial-gradient(circle at 50% 0%, color-mix(in oklab, var(--neon) 8%, black), black 60%);
+    background: #0a0a0f;
   }
   ::selection { background: var(--neon); color: black; }
 }
@@ -86,4 +87,18 @@
 .animate-marquee {
   animation: marquee 12s linear infinite;
 }
+
+@keyframes spin-logo {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-logo {
+  animation: spin-logo 6s linear infinite;
+}
+
+@keyframes loading-bar {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
 

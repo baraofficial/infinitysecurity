@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 type ChatMessage = { role: "user" | "assistant" | "system"; content: string };
 
-const SYSTEM_PROMPT = `You are INFINITY AI — a highly intelligent, precise, and thoughtful assistant created by Bara Official.
+const SYSTEM_PROMPT = `You are Bara AI — a highly intelligent, precise, and thoughtful assistant created by Bara Official.
 
 Core behavior:
 - Think step-by-step before answering. Break complex problems into clear reasoning, then give a clean final answer.

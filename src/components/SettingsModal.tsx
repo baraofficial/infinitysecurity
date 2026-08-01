@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Upload, Trash2, LogOut, User } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -9,8 +10,10 @@ interface SettingsModalProps {
   onUploadPhoto: (file: File) => void;
   onLogout: () => void;
   onClearChat: () => void;
-  onSystemPrompt:() => void;
 }
+
+const DEFAULT_SYSTEM_PROMPT =
+  'Kamu adalah Bara AI, asisten AI yang cerdas, membantu, dan ramah.';
 
 export default function SettingsModal({
   isOpen,
@@ -20,23 +23,22 @@ export default function SettingsModal({
   onUploadPhoto,
   onLogout,
   onClearChat,
-  onSystemPrompt,
 }: SettingsModalProps) {
   const [tempUsername, setTempUsername] = useState(username);
-  const [systemPrompt, setSystemPrompt] = useState<string>("");
+  const [systemPrompt, setSystemPrompt] = useState<string>('');
 
-  // Load data dari localStorage pas modal dibuka
   useEffect(() => {
     if (isOpen) {
       setTempUsername(username);
-      const sp = localStorage.getItem("systemPrompt") || "Kamu adalah Infinity AI, asisten AI yang membantu dan ramah.";
-      setSystemPrompt(sp);
+      setSystemPrompt(localStorage.getItem('systemPrompt') || DEFAULT_SYSTEM_PROMPT);
     }
   }, [isOpen, username]);
 
   const handleSave = () => {
     onUsernameChange(tempUsername);
-    localStorage.setItem("systemPrompt", systemPrompt); // SIMPAN SYSTEM PROMPT
+    localStorage.setItem('currentUser', tempUsername);
+    localStorage.setItem('systemPrompt', systemPrompt);
+    toast.success('Settings updated');
     onClose();
   };
 
@@ -49,20 +51,20 @@ export default function SettingsModal({
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-[#1F1F1F] border-2 border-[#8B5CF6] rounded-2xl w-full max-w-md p-6 shadow-[0_0_30px_rgba(139,92,246,0.3)]">
+      <div className="bg-[#12121a] border border-[#ef4444]/50 rounded-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-[#8B5CF6] text-lg font-bold tracking-widest">SETTINGS</h2>
-          <button onClick={onClose} className="text-[#8B5CF6] hover:text-white">
+          <h2 className="text-[#ef4444] text-lg font-bold tracking-widest">SETTINGS</h2>
+          <button onClick={onClose} className="text-[#ef4444] hover:text-white" aria-label="close">
             <X size={20} />
           </button>
         </div>
 
         {/* Username */}
         <div className="mb-4">
-          <label className="text-xs text-[#8B5CF6] tracking-widest mb-2 block">USERNAME</label>
-          <div className="flex items-center gap-2 bg-black border border-[#8B5CF6] rounded-xl px-3 py-2">
-            <User size={16} className="text-[#8B5CF6]" />
+          <label className="text-xs text-[#ef4444] tracking-widest mb-2 block">USERNAME</label>
+          <div className="flex items-center gap-2 bg-[#0a0a0f] border border-[#ef4444]/40 rounded-full px-4 py-3">
+            <User size={16} className="text-[#ef4444]" />
             <input
               value={tempUsername}
               onChange={(e) => setTempUsername(e.target.value)}
@@ -71,24 +73,24 @@ export default function SettingsModal({
           </div>
         </div>
 
-        {/* SYSTEM PROMPT BARU */}
+        {/* System prompt */}
         <div className="mb-4">
-          <label className="text-xs text-[#8B5CF6] tracking-widest mb-2 block">SYSTEM PROMPT</label>
+          <label className="text-xs text-[#ef4444] tracking-widest mb-2 block">SYSTEM PROMPT</label>
           <textarea
             value={systemPrompt}
             onChange={(e) => setSystemPrompt(e.target.value)}
-            rows={4}
-            className="w-full bg-black border-[#8B5CF6] rounded-xl px-3 py-2 text-white text-sm outline-none resize-none"
+            rows={5}
+            className="w-full bg-[#0a0a0f] border border-[#ef4444]/40 rounded-2xl px-4 py-3 text-white text-sm outline-none resize-none"
             placeholder="Atur kepribadian AI di sini..."
           />
         </div>
 
         {/* Upload Photo */}
         <div className="mb-4">
-          <label className="text-xs text-[#8B5CF6] tracking-widest mb-2 block">PROFILE PHOTO</label>
-          <label className="flex items-center justify-center gap-2 bg-black border border-dashed border-[#8B5CF6] rounded-xl px-3 py-3 cursor-pointer hover:bg-[#8B5CF6]/10">
-            <Upload size={16} className="text-[#8B5CF6]" />
-            <span className="text-xs text-[#8B5CF6]">Upload Foto</span>
+          <label className="text-xs text-[#ef4444] tracking-widest mb-2 block">PROFILE PHOTO</label>
+          <label className="flex items-center justify-center gap-2 bg-[#0a0a0f] border border-dashed border-[#ef4444]/50 rounded-full px-4 py-3 cursor-pointer hover:bg-[#ef4444]/10">
+            <Upload size={16} className="text-[#ef4444]" />
+            <span className="text-xs text-[#ef4444]">Upload Foto</span>
             <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
           </label>
         </div>
@@ -97,22 +99,30 @@ export default function SettingsModal({
         <div className="space-y-2">
           <button
             onClick={onClearChat}
-            className="w-full flex items-center justify-center gap-2 bg-black border-red-500 text-red-500 rounded-xl px-3 py-2 text-sm hover:bg-red-500 hover:text-white"
+            className="w-full flex items-center justify-center gap-2 bg-transparent border border-[#ef4444]/50 text-[#ef4444] rounded-full px-4 py-3 text-sm hover:bg-[#ef4444]/10"
           >
             <Trash2 size={16} /> Clear Chat
           </button>
           <button
             onClick={onLogout}
-            className="w-full flex items-center justify-center gap-2 bg-black border border-[#8B5CF6] text-[#8B5CF6] rounded-xl px-3 py-2 text-sm hover:bg-[#8B5CF6] hover:text-black"
+            className="w-full flex items-center justify-center gap-2 bg-transparent border border-[#ef4444]/50 text-[#ef4444] rounded-full px-4 py-3 text-sm hover:bg-[#ef4444]/10"
           >
-            <LogOut size={16} /> Logout
+            <LogOut size={16} /> Log Out
           </button>
-          <button
-            onClick={handleSave}
-            className="w-full bg-[#8B5CF6] text-black font-bold rounded-xl px-3 py-2 text-sm mt-2"
-          >
-            SAVE
-          </button>
+          <div className="flex gap-[10px] pt-2">
+            <button
+              onClick={onClose}
+              className="flex-1 bg-transparent border border-[#ef4444]/50 text-[#ef4444] rounded-full px-4 py-3 text-sm hover:bg-[#ef4444]/10"
+            >
+              CANCEL
+            </button>
+            <button
+              onClick={handleSave}
+              className="flex-1 bg-[#dc2626] hover:bg-[#ef4444] text-white font-bold rounded-full px-4 py-3 text-sm transition"
+            >
+              SAVE
+            </button>
+          </div>
         </div>
       </div>
     </div>

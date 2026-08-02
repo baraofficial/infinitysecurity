@@ -207,15 +207,6 @@ export default function ChatInput({
           />
         </button>
 
-        {attachmentCount > 0 && (
-          <button
-            type="button"
-            onClick={onClearAttachments}
-            className="shrink-0 text-[10px] text-[#ef4444] px-2"
-          >
-            {attachmentCount} file{attachmentCount > 1 ? "s" : ""} ×
-          </button>
-        )}
 
         <input
           value={value}

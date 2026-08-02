@@ -2,7 +2,18 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, LogOut, Menu, Trash2, MessageSquare, Settings } from "lucide-react";
+import {
+  Plus,
+  LogOut,
+  Menu,
+  Trash2,
+  MessageSquare,
+  Settings,
+  Copy,
+  ThumbsUp,
+  ThumbsDown,
+  Github,
+} from "lucide-react";
 import { RenderMessage } from "@/components/CodeBlock";
 import SettingsModal from "@/components/SettingsModal";
 import ChatInput from "@/components/ChatInput";

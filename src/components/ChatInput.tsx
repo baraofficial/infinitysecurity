@@ -5,7 +5,8 @@ interface ChatInputProps {
   onSend: (message: string) => void;
   onFiles?: (files: File[]) => void;
   disabled?: boolean;
-  attachmentCount?: number;
+  attachments?: File[];
+  onRemoveAttachment?: (index: number) => void;
   onClearAttachments?: () => void;
 }
 
@@ -13,18 +14,31 @@ export default function ChatInput({
   onSend,
   onFiles,
   disabled = false,
-  attachmentCount = 0,
+  attachments = [],
+  onRemoveAttachment,
   onClearAttachments,
 }: ChatInputProps) {
   const [value, setValue] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [githubOpen, setGithubOpen] = useState(false);
   const [repoUrl, setRepoUrl] = useState("");
+  const [previews, setPreviews] = useState<{ url: string; name: string }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
 
+  const attachmentCount = attachments.length;
   const canSend = (value.trim().length > 0 || attachmentCount > 0) && !disabled;
+
+  useEffect(() => {
+    const items = attachments.map((f) => ({
+      url: f.type.startsWith("image/") ? URL.createObjectURL(f) : "",
+      name: f.name,
+    }));
+    setPreviews(items);
+    return () => items.forEach((i) => i.url && URL.revokeObjectURL(i.url));
+  }, [attachments]);
+
 
   useEffect(() => {
     if (!menuOpen) return;

@@ -520,7 +520,7 @@ function ChatPage() {
             <div className="flex justify-start">
               <div className="rounded-2xl border border-[#ef4444]/40 bg-[#12121a] px-4 py-3 text-sm flex items-center gap-2 text-[#ef4444]">
                 <span className="inline-block animate-pulse">thinking</span>
-                <span className="animate-pulse">▍</span>
+
               </div>
             </div>
           )}

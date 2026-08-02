@@ -5,7 +5,8 @@ interface ChatInputProps {
   onSend: (message: string) => void;
   onFiles?: (files: File[]) => void;
   disabled?: boolean;
-  attachmentCount?: number;
+  attachments?: File[];
+  onRemoveAttachment?: (index: number) => void;
   onClearAttachments?: () => void;
 }
 
@@ -13,18 +14,31 @@ export default function ChatInput({
   onSend,
   onFiles,
   disabled = false,
-  attachmentCount = 0,
+  attachments = [],
+  onRemoveAttachment,
   onClearAttachments,
 }: ChatInputProps) {
   const [value, setValue] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [githubOpen, setGithubOpen] = useState(false);
   const [repoUrl, setRepoUrl] = useState("");
+  const [previews, setPreviews] = useState<{ url: string; name: string }[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
 
+  const attachmentCount = attachments.length;
   const canSend = (value.trim().length > 0 || attachmentCount > 0) && !disabled;
+
+  useEffect(() => {
+    const items = attachments.map((f) => ({
+      url: f.type.startsWith("image/") ? URL.createObjectURL(f) : "",
+      name: f.name,
+    }));
+    setPreviews(items);
+    return () => items.forEach((i) => i.url && URL.revokeObjectURL(i.url));
+  }, [attachments]);
+
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -111,6 +125,33 @@ export default function ChatInput({
               IMPOR
             </button>
           </div>
+        </div>
+      )}
+
+      {previews.length > 0 && (
+        <div className="mb-2 flex flex-wrap gap-2">
+          {previews.map((p, i) => (
+            <div
+              key={i}
+              className="relative h-16 w-16 rounded-xl overflow-hidden border border-[#ef4444]/40 bg-[#12121a]"
+            >
+              {p.url ? (
+                <img src={p.url} alt={p.name} className="h-full w-full object-cover" />
+              ) : (
+                <span className="h-full w-full flex items-center justify-center text-[9px] text-[#ef4444] px-1 text-center break-all">
+                  {p.name.slice(0, 14)}
+                </span>
+              )}
+              <button
+                type="button"
+                aria-label="hapus lampiran"
+                onClick={() => onRemoveAttachment?.(i)}
+                className="absolute top-0.5 right-0.5 h-4 w-4 flex items-center justify-center rounded-full bg-black/70 text-[#ef4444]"
+              >
+                <X size={10} />
+              </button>
+            </div>
+          ))}
         </div>
       )}
 

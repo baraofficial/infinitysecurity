@@ -2,7 +2,18 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, LogOut, Menu, Trash2, MessageSquare, Settings } from "lucide-react";
+import {
+  Plus,
+  LogOut,
+  Menu,
+  Trash2,
+  MessageSquare,
+  Settings,
+  Copy,
+  ThumbsUp,
+  ThumbsDown,
+  Github,
+} from "lucide-react";
 import { RenderMessage } from "@/components/CodeBlock";
 import SettingsModal from "@/components/SettingsModal";
 import ChatInput from "@/components/ChatInput";
@@ -18,11 +29,85 @@ type Message = {
   id: string;
   role: "user" | "assistant";
   content: string;
-  media?: { url: string; type: string }[];
+  media?: { url: string; type: string; name?: string }[];
 };
 
 const DEFAULT_SYSTEM_PROMPT =
   "Kamu adalah Bara AI, asisten AI yang cerdas, membantu, dan ramah.";
+
+const REPO_RE = /(https?:\/\/github\.com\/[^\s]+)/i;
+
+function RepoCard({ url }: { url: string }) {
+  const clean = url.replace(/[.,)]+$/, "");
+  const parts = clean.replace(/^https?:\/\/github\.com\//i, "").split("/");
+  return (
+    <a
+      href={clean}
+      target="_blank"
+      rel="noreferrer"
+      className="flex items-center gap-3 border border-[#ef4444]/50 bg-[#0a0a0f] px-3 py-2 rounded-xl hover:bg-[#ef4444]/10 transition"
+    >
+      <Github size={18} className="shrink-0 text-[#ef4444]" />
+      <span className="min-w-0">
+        <span className="block text-[10px] tracking-widest text-[#ef4444]/70">
+          GITHUB REPO
+        </span>
+        <span className="block truncate text-xs text-[#f5f5f5]">
+          {parts[0]}/{parts[1] ?? ""}
+        </span>
+      </span>
+    </a>
+  );
+}
+
+function AssistantActions({ content }: { content: string }) {
+  const [vote, setVote] = useState<"up" | "down" | null>(null);
+  return (
+    <div className="mt-3 flex items-center gap-1 border-t border-[#ef4444]/20 pt-2">
+      <button
+        type="button"
+        aria-label="salin"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(content);
+            toast.success("Disalin");
+          } catch {
+            toast.error("Gagal menyalin");
+          }
+        }}
+        className="h-7 w-7 flex items-center justify-center rounded-lg text-[#ef4444]/70 hover:text-white hover:bg-[#ef4444]/15 transition"
+      >
+        <Copy size={14} />
+      </button>
+      <button
+        type="button"
+        aria-label="suka"
+        onClick={() => {
+          setVote("up");
+          toast.success("Terima kasih atas feedback-nya");
+        }}
+        className={`h-7 w-7 flex items-center justify-center rounded-lg transition hover:bg-[#ef4444]/15 ${
+          vote === "up" ? "text-[#ef4444]" : "text-[#ef4444]/70 hover:text-white"
+        }`}
+      >
+        <ThumbsUp size={14} />
+      </button>
+      <button
+        type="button"
+        aria-label="tidak suka"
+        onClick={() => {
+          setVote("down");
+          toast("Masukan diterima");
+        }}
+        className={`h-7 w-7 flex items-center justify-center rounded-lg transition hover:bg-[#ef4444]/15 ${
+          vote === "down" ? "text-[#ef4444]" : "text-[#ef4444]/70 hover:text-white"
+        }`}
+      >
+        <ThumbsDown size={14} />
+      </button>
+    </div>
+  );
+}
 
 function ChatPage() {
   const navigate = useNavigate();
@@ -136,7 +221,12 @@ function ChatPage() {
 
       const media = attachments.map((f) => ({
         url: URL.createObjectURL(f),
-        type: f.type.startsWith("video/") ? "video" : "image",
+        type: f.type.startsWith("video/")
+          ? "video"
+          : f.type.startsWith("image/")
+            ? "image"
+            : "file",
+        name: f.name,
       }));
       const userMsg: Message = {
         id: crypto.randomUUID(),
@@ -338,7 +428,10 @@ function ChatPage() {
                   {m.role === "user" ? `> ${username}` : "> bara"}
                 </div>
                 {m.role === "assistant" ? (
-                  <RenderMessage content={m.content} />
+                  <>
+                    <RenderMessage content={m.content} />
+                    <AssistantActions content={m.content} />
+                  </>
                 ) : (
                   <div className="space-y-2">
                     {m.media && m.media.length > 0 && (
@@ -351,16 +444,29 @@ function ChatPage() {
                               controls
                               className="max-w-full rounded-xl border border-[#ef4444]/40"
                             />
-                          ) : (
+                          ) : mm.type === "image" ? (
                             <img
                               key={i}
                               src={mm.url}
                               alt="attachment"
                               className="max-w-full rounded-xl border border-[#ef4444]/40"
                             />
+                          ) : (
+                            <a
+                              key={i}
+                              href={mm.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="block truncate text-xs px-3 py-2 rounded-xl border border-[#ef4444]/40 bg-[#0a0a0f] text-[#f5f5f5]"
+                            >
+                              📄 {mm.name ?? "file"}
+                            </a>
                           ),
                         )}
                       </div>
+                    )}
+                    {REPO_RE.test(m.content) && (
+                      <RepoCard url={m.content.match(REPO_RE)![1]} />
                     )}
                     {m.content && (
                       <span className="whitespace-pre-wrap block">{m.content}</span>
@@ -384,7 +490,10 @@ function ChatPage() {
           onSend={send}
           onFiles={(files) => setAttachments((prev) => [...prev, ...files])}
           disabled={sending}
-          attachmentCount={attachments.length}
+          attachments={attachments}
+          onRemoveAttachment={(i) =>
+            setAttachments((prev) => prev.filter((_, idx) => idx !== i))
+          }
           onClearAttachments={() => setAttachments([])}
         />
       </main>

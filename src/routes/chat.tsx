@@ -423,7 +423,10 @@ function ChatPage() {
                   {m.role === "user" ? `> ${username}` : "> bara"}
                 </div>
                 {m.role === "assistant" ? (
-                  <RenderMessage content={m.content} />
+                  <>
+                    <RenderMessage content={m.content} />
+                    <AssistantActions content={m.content} />
+                  </>
                 ) : (
                   <div className="space-y-2">
                     {m.media && m.media.length > 0 && (
@@ -436,16 +439,29 @@ function ChatPage() {
                               controls
                               className="max-w-full rounded-xl border border-[#ef4444]/40"
                             />
-                          ) : (
+                          ) : mm.type === "image" ? (
                             <img
                               key={i}
                               src={mm.url}
                               alt="attachment"
                               className="max-w-full rounded-xl border border-[#ef4444]/40"
                             />
+                          ) : (
+                            <a
+                              key={i}
+                              href={mm.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="block truncate text-xs px-3 py-2 rounded-xl border border-[#ef4444]/40 bg-[#0a0a0f] text-[#f5f5f5]"
+                            >
+                              📄 {mm.name ?? "file"}
+                            </a>
                           ),
                         )}
                       </div>
+                    )}
+                    {REPO_RE.test(m.content) && (
+                      <RepoCard url={m.content.match(REPO_RE)![1]} />
                     )}
                     {m.content && (
                       <span className="whitespace-pre-wrap block">{m.content}</span>

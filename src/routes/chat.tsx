@@ -490,7 +490,10 @@ function ChatPage() {
           onSend={send}
           onFiles={(files) => setAttachments((prev) => [...prev, ...files])}
           disabled={sending}
-          attachmentCount={attachments.length}
+          attachments={attachments}
+          onRemoveAttachment={(i) =>
+            setAttachments((prev) => prev.filter((_, idx) => idx !== i))
+          }
           onClearAttachments={() => setAttachments([])}
         />
       </main>

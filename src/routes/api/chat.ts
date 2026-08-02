@@ -42,6 +42,7 @@ export const Route = createFileRoute("/api/chat")({
           },
           body: JSON.stringify({
             model: "google/gemini-2.5-pro",
+            stream: true,
             messages: [
               { role: "system", content: SYSTEM_PROMPT },
               ...body.messages.slice(-30),
@@ -49,19 +50,23 @@ export const Route = createFileRoute("/api/chat")({
           }),
         });
 
-        if (!res.ok) {
-          const text = await res.text();
+        if (!res.ok || !res.body) {
+          const text = await res.text().catch(() => "");
           if (res.status === 429) return new Response("Rate limited. Try again shortly.", { status: 429 });
           if (res.status === 402) return new Response("AI credits exhausted. Add credits to continue.", { status: 402 });
-          return new Response(text || "AI request failed", { status: res.status });
+          return new Response(text || "AI request failed", { status: res.status || 500 });
         }
 
-        const data = (await res.json()) as {
-          choices?: Array<{ message?: { content?: string } }>;
-        };
-        const content = data.choices?.[0]?.message?.content ?? "";
-        return Response.json({ content });
+        return new Response(res.body, {
+          headers: {
+            "Content-Type": "text/event-stream; charset=utf-8",
+            "Cache-Control": "no-cache, no-transform",
+            Connection: "keep-alive",
+            "X-Accel-Buffering": "no",
+          },
+        });
       },
     },
   },
 });
+

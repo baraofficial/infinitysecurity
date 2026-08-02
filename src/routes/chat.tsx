@@ -35,6 +35,80 @@ type Message = {
 const DEFAULT_SYSTEM_PROMPT =
   "Kamu adalah Bara AI, asisten AI yang cerdas, membantu, dan ramah.";
 
+const REPO_RE = /(https?:\/\/github\.com\/[^\s]+)/i;
+
+function RepoCard({ url }: { url: string }) {
+  const clean = url.replace(/[.,)]+$/, "");
+  const parts = clean.replace(/^https?:\/\/github\.com\//i, "").split("/");
+  return (
+    <a
+      href={clean}
+      target="_blank"
+      rel="noreferrer"
+      className="flex items-center gap-3 border border-[#ef4444]/50 bg-[#0a0a0f] px-3 py-2 rounded-xl hover:bg-[#ef4444]/10 transition"
+    >
+      <Github size={18} className="shrink-0 text-[#ef4444]" />
+      <span className="min-w-0">
+        <span className="block text-[10px] tracking-widest text-[#ef4444]/70">
+          GITHUB REPO
+        </span>
+        <span className="block truncate text-xs text-[#f5f5f5]">
+          {parts[0]}/{parts[1] ?? ""}
+        </span>
+      </span>
+    </a>
+  );
+}
+
+function AssistantActions({ content }: { content: string }) {
+  const [vote, setVote] = useState<"up" | "down" | null>(null);
+  return (
+    <div className="mt-3 flex items-center gap-1 border-t border-[#ef4444]/20 pt-2">
+      <button
+        type="button"
+        aria-label="salin"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(content);
+            toast.success("Disalin");
+          } catch {
+            toast.error("Gagal menyalin");
+          }
+        }}
+        className="h-7 w-7 flex items-center justify-center rounded-lg text-[#ef4444]/70 hover:text-white hover:bg-[#ef4444]/15 transition"
+      >
+        <Copy size={14} />
+      </button>
+      <button
+        type="button"
+        aria-label="suka"
+        onClick={() => {
+          setVote("up");
+          toast.success("Terima kasih atas feedback-nya");
+        }}
+        className={`h-7 w-7 flex items-center justify-center rounded-lg transition hover:bg-[#ef4444]/15 ${
+          vote === "up" ? "text-[#ef4444]" : "text-[#ef4444]/70 hover:text-white"
+        }`}
+      >
+        <ThumbsUp size={14} />
+      </button>
+      <button
+        type="button"
+        aria-label="tidak suka"
+        onClick={() => {
+          setVote("down");
+          toast("Masukan diterima");
+        }}
+        className={`h-7 w-7 flex items-center justify-center rounded-lg transition hover:bg-[#ef4444]/15 ${
+          vote === "down" ? "text-[#ef4444]" : "text-[#ef4444]/70 hover:text-white"
+        }`}
+      >
+        <ThumbsDown size={14} />
+      </button>
+    </div>
+  );
+}
+
 function ChatPage() {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);

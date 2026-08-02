@@ -221,7 +221,12 @@ function ChatPage() {
 
       const media = attachments.map((f) => ({
         url: URL.createObjectURL(f),
-        type: f.type.startsWith("video/") ? "video" : "image",
+        type: f.type.startsWith("video/")
+          ? "video"
+          : f.type.startsWith("image/")
+            ? "image"
+            : "file",
+        name: f.name,
       }));
       const userMsg: Message = {
         id: crypto.randomUUID(),

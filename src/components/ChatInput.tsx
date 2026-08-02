@@ -128,6 +128,33 @@ export default function ChatInput({
         </div>
       )}
 
+      {previews.length > 0 && (
+        <div className="mb-2 flex flex-wrap gap-2">
+          {previews.map((p, i) => (
+            <div
+              key={i}
+              className="relative h-16 w-16 rounded-xl overflow-hidden border border-[#ef4444]/40 bg-[#12121a]"
+            >
+              {p.url ? (
+                <img src={p.url} alt={p.name} className="h-full w-full object-cover" />
+              ) : (
+                <span className="h-full w-full flex items-center justify-center text-[9px] text-[#ef4444] px-1 text-center break-all">
+                  {p.name.slice(0, 14)}
+                </span>
+              )}
+              <button
+                type="button"
+                aria-label="hapus lampiran"
+                onClick={() => onRemoveAttachment?.(i)}
+                className="absolute top-0.5 right-0.5 h-4 w-4 flex items-center justify-center rounded-full bg-black/70 text-[#ef4444]"
+              >
+                <X size={10} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div
         ref={wrapRef}
         className="relative flex items-center gap-2 rounded-2xl bg-[#12121a] border border-[#ef4444]/30 px-2 py-2"

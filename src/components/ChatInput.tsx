@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { Plus, Send } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Plus, Send, Paperclip, Camera, Github, X } from "lucide-react";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -17,14 +17,36 @@ export default function ChatInput({
   onClearAttachments,
 }: ChatInputProps) {
   const [value, setValue] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [githubOpen, setGithubOpen] = useState(false);
+  const [repoUrl, setRepoUrl] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
 
   const canSend = (value.trim().length > 0 || attachmentCount > 0) && !disabled;
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function onDoc(e: MouseEvent) {
+      if (!wrapRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [menuOpen]);
 
   function submit() {
     if (!canSend) return;
     onSend(value.trim());
     setValue("");
+  }
+
+  function submitRepo() {
+    const url = repoUrl.trim();
+    if (!url) return;
+    onSend(`Impor repo GitHub: ${url}\nTolong analisa repositori ini.`);
+    setRepoUrl("");
+    setGithubOpen(false);
   }
 
   return (
@@ -33,7 +55,18 @@ export default function ChatInput({
         ref={fileRef}
         type="file"
         multiple
-        accept="image/*,video/*"
+        className="hidden"
+        onChange={(e) => {
+          const files = Array.from(e.target.files ?? []);
+          if (files.length) onFiles?.(files);
+          e.target.value = "";
+        }}
+      />
+      <input
+        ref={cameraRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
         className="hidden"
         onChange={(e) => {
           const files = Array.from(e.target.files ?? []);
@@ -42,14 +75,95 @@ export default function ChatInput({
         }}
       />
 
-      <div className="flex items-center gap-2 rounded-2xl bg-[#12121a] border border-[#ef4444]/30 px-2 py-2">
+      {githubOpen && (
+        <div className="mb-2 rounded-2xl bg-[#12121a] border border-[#ef4444]/30 p-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] tracking-widest text-[#ef4444]">
+              IMPOR REPO GITHUB
+            </span>
+            <button
+              type="button"
+              aria-label="close github import"
+              onClick={() => setGithubOpen(false)}
+              className="text-[#ef4444]/70 hover:text-white"
+            >
+              <X size={14} />
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              value={repoUrl}
+              onChange={(e) => setRepoUrl(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  submitRepo();
+                }
+              }}
+              placeholder="https://github.com/user/repo"
+              className="flex-1 min-w-0 bg-[#0a0a0f] border border-[#ef4444]/30 rounded-xl px-3 py-2 text-white text-xs outline-none placeholder:text-gray-500"
+            />
+            <button
+              type="button"
+              onClick={submitRepo}
+              className="shrink-0 text-xs px-3 py-2 rounded-xl bg-[#dc2626] hover:bg-[#ef4444] text-white transition"
+            >
+              IMPOR
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div
+        ref={wrapRef}
+        className="relative flex items-center gap-2 rounded-2xl bg-[#12121a] border border-[#ef4444]/30 px-2 py-2"
+      >
+        {menuOpen && (
+          <div className="absolute bottom-full left-0 mb-2 w-56 rounded-2xl bg-[#12121a] border border-[#ef4444]/30 p-2 space-y-1 z-20">
+            <button
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                fileRef.current?.click();
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-white hover:bg-[#ef4444]/10 transition"
+            >
+              <Paperclip size={16} className="text-[#ef4444]" /> Upload File
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                cameraRef.current?.click();
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-white hover:bg-[#ef4444]/10 transition"
+            >
+              <Camera size={16} className="text-[#ef4444]" /> Kamera
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                setGithubOpen(true);
+              }}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-white hover:bg-[#ef4444]/10 transition"
+            >
+              <Github size={16} className="text-[#ef4444]" /> Impor Repo GitHub
+            </button>
+          </div>
+        )}
+
         <button
           type="button"
-          aria-label="upload file"
-          onClick={() => fileRef.current?.click()}
+          aria-label="attachment menu"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((v) => !v)}
           className="shrink-0 h-9 w-9 flex items-center justify-center rounded-full bg-[#ef4444]/10 hover:bg-[#ef4444]/20 transition"
         >
-          <Plus size={18} className="text-[#ef4444]" />
+          <Plus
+            size={18}
+            className={`text-[#ef4444] transition-transform ${menuOpen ? "rotate-45" : ""}`}
+          />
         </button>
 
         {attachmentCount > 0 && (

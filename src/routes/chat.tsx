@@ -264,21 +264,61 @@ function ChatPage() {
         }),
       });
       if (!res.ok) throw new Error(await res.text());
-      const data = (await res.json()) as { content?: string; message?: string };
-      const content = data.content ?? data.message ?? "";
 
-      const aiMsg: Message = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content,
-      };
-      setMessages((m) => [...m, aiMsg]);
+      const aiId = crypto.randomUUID();
+      let content = "";
+
+      if (res.body) {
+        // Streaming: bytes mulai mengalir langsung, jadi tidak kena timeout 524
+        setMessages((m) => [...m, { id: aiId, role: "assistant", content: "" }]);
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          const lines = buf.split("\n");
+          buf = lines.pop() ?? "";
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed.startsWith("data:")) continue;
+            const payload = trimmed.slice(5).trim();
+            if (!payload || payload === "[DONE]") continue;
+            try {
+              const json = JSON.parse(payload) as {
+                choices?: Array<{ delta?: { content?: string } }>;
+              };
+              const delta = json.choices?.[0]?.delta?.content;
+              if (delta) {
+                content += delta;
+                setMessages((m) =>
+                  m.map((mm) => (mm.id === aiId ? { ...mm, content } : mm)),
+                );
+              }
+            } catch {
+              /* ignore partial chunk */
+            }
+          }
+        }
+      }
+
+      if (!content) {
+        content = "(kosong)";
+        setMessages((m) =>
+          m.some((mm) => mm.id === aiId)
+            ? m.map((mm) => (mm.id === aiId ? { ...mm, content } : mm))
+            : [...m, { id: aiId, role: "assistant", content }],
+        );
+      }
+
       await supabase.from("messages").insert({
         conversation_id: convId,
         user_id: userId,
         role: "assistant",
         content,
       });
+
 
       await supabase
         .from("conversations")

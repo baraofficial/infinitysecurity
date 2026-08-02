@@ -29,7 +29,7 @@ type Message = {
   id: string;
   role: "user" | "assistant";
   content: string;
-  media?: { url: string; type: string }[];
+  media?: { url: string; type: string; name?: string }[];
 };
 
 const DEFAULT_SYSTEM_PROMPT =

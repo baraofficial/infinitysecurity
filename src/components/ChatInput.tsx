@@ -26,6 +26,18 @@ export default function ChatInput({
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // auto-grow up to 7 lines, then scroll
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const line = 24;
+    const max = line * 7;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, max)}px`;
+    el.style.overflowY = el.scrollHeight > max ? "auto" : "hidden";
+  }, [value]);
 
   const attachmentCount = attachments.length;
   const canSend = (value.trim().length > 0 || attachmentCount > 0) && !disabled;
@@ -157,7 +169,7 @@ export default function ChatInput({
 
       <div
         ref={wrapRef}
-        className="relative flex items-center gap-2 rounded-2xl bg-[#12121a] border border-[#ef4444]/30 px-2 py-2"
+        className="relative flex items-end gap-2 rounded-2xl bg-[#12121a] border border-[#ef4444]/30 px-2 py-2"
       >
         {menuOpen && (
           <div className="absolute bottom-full left-0 mb-2 w-56 rounded-2xl bg-[#12121a] border border-[#ef4444]/30 p-2 space-y-1 z-20">
@@ -208,7 +220,9 @@ export default function ChatInput({
         </button>
 
 
-        <input
+        <textarea
+          ref={textareaRef}
+          rows={1}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => {
@@ -219,7 +233,7 @@ export default function ChatInput({
           }}
           placeholder="Message Bara AI..."
           disabled={disabled}
-          className="flex-1 min-w-0 bg-transparent text-white text-sm outline-none placeholder:text-gray-500"
+          className="flex-1 min-w-0 resize-none bg-transparent text-white text-sm leading-6 py-1.5 outline-none placeholder:text-gray-500 overflow-y-auto"
         />
 
         <button

@@ -26,6 +26,18 @@ export default function ChatInput({
   const fileRef = useRef<HTMLInputElement>(null);
   const cameraRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // auto-grow up to 7 lines, then scroll
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const line = 24;
+    const max = line * 7;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, max)}px`;
+    el.style.overflowY = el.scrollHeight > max ? "auto" : "hidden";
+  }, [value]);
 
   const attachmentCount = attachments.length;
   const canSend = (value.trim().length > 0 || attachmentCount > 0) && !disabled;

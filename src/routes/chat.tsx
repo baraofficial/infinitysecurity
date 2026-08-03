@@ -579,7 +579,6 @@ function ChatPage() {
         onClose={() => setSettingsOpen(false)}
         username={username}
         onUsernameChange={setUsername}
-        onUploadPhoto={() => {}}
         onLogout={signOut}
         onClearChat={clearChat}
       />

@@ -13,6 +13,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   Github,
+  ChevronDown,
 } from "lucide-react";
 import { RenderMessage } from "@/components/CodeBlock";
 import SettingsModal from "@/components/SettingsModal";
@@ -120,7 +121,10 @@ function ChatPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [showScrollBtn, setShowScrollBtn] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
+  const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -175,6 +179,27 @@ function ChatPage() {
       behavior: "smooth",
     });
   }, [messages, sending]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const handleScroll = () => {
+      const nearBottom =
+        el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+      setShowScrollBtn(!nearBottom);
+    };
+
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  function scrollToBottom() {
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }
 
   function newChat() {
     setActiveId(null);
@@ -401,7 +426,7 @@ function ChatPage() {
       )}
 
       {/* Main */}
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="relative flex-1 flex flex-col min-w-0">
         {/* Header */}
         <div className="flex items-center justify-between gap-3 px-4 pt-4">
           <button
@@ -525,6 +550,17 @@ function ChatPage() {
             </div>
           )}
         </div>
+
+        {showScrollBtn && (
+          <button
+            type="button"
+            onClick={scrollToBottom}
+            aria-label="scroll to new messages"
+            className="absolute bottom-20 left-1/2 z-10 -translate-x-1/2 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full bg-[#12121a] border border-[#ef4444]/60 text-[#ef4444] text-xs shadow-[0_0_12px_rgba(239,68,68,0.4)] hover:bg-[#ef4444]/10 transition animate-fade-in"
+          >
+            ⬇️ <ChevronDown size={16} />
+          </button>
+        )}
 
         <ChatInput
           onSend={send}

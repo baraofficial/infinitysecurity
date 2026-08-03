@@ -78,16 +78,6 @@ export default function SettingsModal({
           />
         </div>
 
-        {/* Upload Photo */}
-        <div className="mb-4">
-          <label className="text-xs text-[#ef4444] tracking-widest mb-2 block">PROFILE PHOTO</label>
-          <label className="flex items-center justify-center gap-2 bg-[#0a0a0f] border border-dashed border-[#ef4444]/50 rounded-full px-4 py-3 cursor-pointer hover:bg-[#ef4444]/10">
-            <Upload size={16} className="text-[#ef4444]" />
-            <span className="text-xs text-[#ef4444]">Upload Foto</span>
-            <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-          </label>
-        </div>
-
         {/* Buttons */}
         <div className="space-y-2">
           <button

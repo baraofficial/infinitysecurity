@@ -105,6 +105,95 @@ function stripMarkdownEmphasis(s: string) {
     .replace(/(^|[^*])\*(?!\s)([^*\n]+?)\*(?!\*)/g, "$1$2");
 }
 
+function splitRow(line: string) {
+  return line
+    .trim()
+    .replace(/^\|/, "")
+    .replace(/\|$/, "")
+    .split("|")
+    .map((c) => stripMarkdownEmphasis(c.trim()));
+}
+
+function MarkdownTable({ rows }: { rows: string[] }) {
+  const head = splitRow(rows[0]);
+  const bodyRows = rows.slice(2).map(splitRow);
+  return (
+    <div className="my-2 overflow-x-auto rounded-xl" style={{ border: "1px solid #ef444455" }}>
+      <table className="w-full border-collapse text-xs">
+        <thead>
+          <tr>
+            {head.map((h, i) => (
+              <th
+                key={i}
+                className="px-3 py-2 text-left font-bold whitespace-nowrap"
+                style={{ color: "#ef4444", borderBottom: "1px solid #ef444455", background: "#12121a" }}
+              >
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {bodyRows.map((r, ri) => (
+            <tr key={ri} style={{ background: ri % 2 ? "#0f0f16" : "transparent" }}>
+              {head.map((_, ci) => (
+                <td
+                  key={ci}
+                  className="px-3 py-2 align-top text-gray-200"
+                  style={{ borderTop: "1px solid #ef444422" }}
+                >
+                  {r[ci] ?? ""}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+const TABLE_SEP = /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)+\|?\s*$/;
+
+function TextWithTables({ content }: { content: string }) {
+  const lines = content.split("\n");
+  const out: ReactNode[] = [];
+  let buffer: string[] = [];
+
+  const flushText = () => {
+    if (buffer.length) {
+      out.push(
+        <span key={`t${out.length}`} className="whitespace-pre-wrap">
+          {stripMarkdownEmphasis(buffer.join("\n"))}
+        </span>,
+      );
+      buffer = [];
+    }
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const isTableStart =
+      lines[i].trim().includes("|") &&
+      i + 1 < lines.length &&
+      TABLE_SEP.test(lines[i + 1]);
+    if (isTableStart) {
+      flushText();
+      const rows: string[] = [lines[i], lines[i + 1]];
+      let j = i + 2;
+      while (j < lines.length && lines[j].trim().includes("|")) {
+        rows.push(lines[j]);
+        j++;
+      }
+      out.push(<MarkdownTable key={`tbl${out.length}`} rows={rows} />);
+      i = j - 1;
+    } else {
+      buffer.push(lines[i]);
+    }
+  }
+  flushText();
+  return <>{out}</>;
+}
+
 export function RenderMessage({ content }: { content: string }) {
   const parts: Array<{ type: "text" | "code"; content: string; lang?: string }> = [];
   const re = /```(\w*)\n?([\s\S]*?)```/g;
@@ -116,7 +205,7 @@ export function RenderMessage({ content }: { content: string }) {
     last = m.index + m[0].length;
   }
   if (last < content.length) parts.push({ type: "text", content: content.slice(last) });
-  if (parts.length === 0) return <>{stripMarkdownEmphasis(content)}</>;
+  if (parts.length === 0) return <TextWithTables content={content} />;
 
   return (
     <>
@@ -124,7 +213,7 @@ export function RenderMessage({ content }: { content: string }) {
         p.type === "code" ? (
           <CodeBlock key={i} code={p.content} lang={p.lang || ""} />
         ) : (
-          <span key={i} className="whitespace-pre-wrap">{stripMarkdownEmphasis(p.content)}</span>
+          <TextWithTables key={i} content={p.content} />
         ),
       )}
     </>

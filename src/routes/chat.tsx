@@ -13,6 +13,7 @@ import {
   ThumbsUp,
   ThumbsDown,
   Github,
+  ChevronDown,
 } from "lucide-react";
 import { RenderMessage } from "@/components/CodeBlock";
 import SettingsModal from "@/components/SettingsModal";

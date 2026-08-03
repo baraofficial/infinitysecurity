@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Code2, Copy, Check, Eye, EyeOff } from "lucide-react";
 
 function escapeHtml(s: string) {

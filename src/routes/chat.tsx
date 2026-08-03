@@ -551,6 +551,17 @@ function ChatPage() {
           )}
         </div>
 
+        {showScrollBtn && (
+          <button
+            type="button"
+            onClick={scrollToBottom}
+            aria-label="scroll to new messages"
+            className="absolute bottom-20 left-1/2 z-10 -translate-x-1/2 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full bg-[#12121a] border border-[#ef4444]/60 text-[#ef4444] text-xs shadow-[0_0_12px_rgba(239,68,68,0.4)] hover:bg-[#ef4444]/10 transition animate-fade-in"
+          >
+            ⬇️ <ChevronDown size={16} />
+          </button>
+        )}
+
         <ChatInput
           onSend={send}
           onFiles={(files) => setAttachments((prev) => [...prev, ...files])}

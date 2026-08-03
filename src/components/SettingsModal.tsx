@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Upload, Trash2, LogOut, User } from 'lucide-react';
+import { X, Trash2, LogOut, User } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface SettingsModalProps {
@@ -7,7 +7,6 @@ interface SettingsModalProps {
   onClose: () => void;
   username: string;
   onUsernameChange: (name: string) => void;
-  onUploadPhoto: (file: File) => void;
   onLogout: () => void;
   onClearChat: () => void;
 }
@@ -20,7 +19,6 @@ export default function SettingsModal({
   onClose,
   username,
   onUsernameChange,
-  onUploadPhoto,
   onLogout,
   onClearChat,
 }: SettingsModalProps) {
@@ -40,11 +38,6 @@ export default function SettingsModal({
     localStorage.setItem('systemPrompt', systemPrompt);
     toast.success('Settings updated');
     onClose();
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) onUploadPhoto(file);
   };
 
   if (!isOpen) return null;

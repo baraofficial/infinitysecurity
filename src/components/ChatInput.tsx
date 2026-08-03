@@ -169,7 +169,7 @@ export default function ChatInput({
 
       <div
         ref={wrapRef}
-        className="relative flex items-center gap-2 rounded-2xl bg-[#12121a] border border-[#ef4444]/30 px-2 py-2"
+        className="relative flex items-end gap-2 rounded-2xl bg-[#12121a] border border-[#ef4444]/30 px-2 py-2"
       >
         {menuOpen && (
           <div className="absolute bottom-full left-0 mb-2 w-56 rounded-2xl bg-[#12121a] border border-[#ef4444]/30 p-2 space-y-1 z-20">

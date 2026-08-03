@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Upload, Trash2, LogOut, User } from 'lucide-react';
+import { X, Trash2, LogOut, User } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface SettingsModalProps {
@@ -7,7 +7,6 @@ interface SettingsModalProps {
   onClose: () => void;
   username: string;
   onUsernameChange: (name: string) => void;
-  onUploadPhoto: (file: File) => void;
   onLogout: () => void;
   onClearChat: () => void;
 }
@@ -20,7 +19,6 @@ export default function SettingsModal({
   onClose,
   username,
   onUsernameChange,
-  onUploadPhoto,
   onLogout,
   onClearChat,
 }: SettingsModalProps) {
@@ -40,11 +38,6 @@ export default function SettingsModal({
     localStorage.setItem('systemPrompt', systemPrompt);
     toast.success('Settings updated');
     onClose();
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) onUploadPhoto(file);
   };
 
   if (!isOpen) return null;
@@ -83,16 +76,6 @@ export default function SettingsModal({
             className="w-full bg-[#0a0a0f] border border-[#ef4444]/40 rounded-2xl px-4 py-3 text-white text-sm outline-none resize-none"
             placeholder="Atur kepribadian AI di sini..."
           />
-        </div>
-
-        {/* Upload Photo */}
-        <div className="mb-4">
-          <label className="text-xs text-[#ef4444] tracking-widest mb-2 block">PROFILE PHOTO</label>
-          <label className="flex items-center justify-center gap-2 bg-[#0a0a0f] border border-dashed border-[#ef4444]/50 rounded-full px-4 py-3 cursor-pointer hover:bg-[#ef4444]/10">
-            <Upload size={16} className="text-[#ef4444]" />
-            <span className="text-xs text-[#ef4444]">Upload Foto</span>
-            <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-          </label>
         </div>
 
         {/* Buttons */}

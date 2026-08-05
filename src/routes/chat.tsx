@@ -18,7 +18,7 @@ import {
 import { RenderMessage } from "@/components/CodeBlock";
 import SettingsModal from "@/components/SettingsModal";
 import ChatInput from "@/components/ChatInput";
-import logo from "@/assets/bara-logo.png.asset.json";
+import BottomNav from "@/components/BottomNav";
 
 export const Route = createFileRoute("/chat")({
   ssr: false,
@@ -125,6 +125,15 @@ function ChatPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isUserScrolling, setIsUserScrolling] = useState(false);
   const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [draft, setDraft] = useState("");
+
+  useEffect(() => {
+    const d = localStorage.getItem("draftPrompt");
+    if (d) {
+      setDraft(d);
+      localStorage.removeItem("draftPrompt");
+    }
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -439,11 +448,6 @@ function ChatPage() {
           </button>
 
           <div className="flex items-center gap-3 px-5 py-2 bg-[#12121a] border border-[#a855f7]/40 rounded-full">
-            <img
-              src={logo.url}
-              alt="Bara Agent logo"
-              className="h-6 w-6 animate-spin-logo"
-            />
             <span className="text-[#a855f7] text-sm font-bold tracking-widest">
               BARA AGENT
             </span>
@@ -463,11 +467,6 @@ function ChatPage() {
           {messages.length === 0 && !sending && (
             <div className="h-full flex items-center justify-center text-center px-4">
               <div className="flex flex-col items-center">
-                <img
-                  src={logo.url}
-                  alt="Bara Agent logo"
-                  className="h-24 w-24 animate-spin-logo"
-                />
                 <div className="mt-6 text-xl sm:text-2xl text-[#a855f7] tracking-[0.2em]">
                   Welcome to Bara Agent
                 </div>
@@ -563,6 +562,7 @@ function ChatPage() {
         )}
 
         <ChatInput
+          initialText={draft}
           onSend={send}
           onFiles={(files) => setAttachments((prev) => [...prev, ...files])}
           disabled={sending}
@@ -572,6 +572,7 @@ function ChatPage() {
           }
           onClearAttachments={() => setAttachments([])}
         />
+        <BottomNav />
       </main>
 
       <SettingsModal

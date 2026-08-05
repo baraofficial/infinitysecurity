@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
-import logo from "@/assets/bara-logo.png.asset.json";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -36,7 +35,6 @@ function AuthPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f] px-4 font-mono">
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center text-center">
-          <img src={logo.url} alt="Bara Agent logo" className="h-24 w-24 animate-spin-logo" />
           <h1 className="mt-6 text-2xl text-[#a855f7] tracking-[0.3em]">BARA AGENT</h1>
         </div>
         <div className="rounded-2xl border border-[#a855f7]/40 bg-[#12121a] p-6 sm:p-8">

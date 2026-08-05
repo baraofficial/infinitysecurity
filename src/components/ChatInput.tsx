@@ -8,6 +8,7 @@ interface ChatInputProps {
   attachments?: File[];
   onRemoveAttachment?: (index: number) => void;
   onClearAttachments?: () => void;
+  initialText?: string;
 }
 
 export default function ChatInput({
@@ -17,8 +18,9 @@ export default function ChatInput({
   attachments = [],
   onRemoveAttachment,
   onClearAttachments,
+  initialText = "",
 }: ChatInputProps) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(initialText);
   const [menuOpen, setMenuOpen] = useState(false);
   const [githubOpen, setGithubOpen] = useState(false);
   const [repoUrl, setRepoUrl] = useState("");
@@ -27,6 +29,10 @@ export default function ChatInput({
   const cameraRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (initialText) setValue(initialText);
+  }, [initialText]);
 
   // auto-grow up to 7 lines, then scroll
   useEffect(() => {

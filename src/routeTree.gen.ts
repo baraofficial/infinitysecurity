@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiGithubRouteImport } from './routes/api/github'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
 const ChatRoute = ChatRouteImport.update({
@@ -29,6 +30,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiGithubRoute = ApiGithubRouteImport.update({
+  id: '/api/github',
+  path: '/api/github',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -40,12 +46,14 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/github': typeof ApiGithubRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/github': typeof ApiGithubRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/github': typeof ApiGithubRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/chat' | '/api/chat'
+  fullPaths: '/' | '/auth' | '/chat' | '/api/chat' | '/api/github'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/chat' | '/api/chat'
-  id: '__root__' | '/' | '/auth' | '/chat' | '/api/chat'
+  to: '/' | '/auth' | '/chat' | '/api/chat' | '/api/github'
+  id: '__root__' | '/' | '/auth' | '/chat' | '/api/chat' | '/api/github'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +76,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ChatRoute: typeof ChatRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiGithubRoute: typeof ApiGithubRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/github': {
+      id: '/api/github'
+      path: '/api/github'
+      fullPath: '/api/github'
+      preLoaderRoute: typeof ApiGithubRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ChatRoute: ChatRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiGithubRoute: ApiGithubRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

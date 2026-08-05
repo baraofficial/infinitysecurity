@@ -1,5 +1,5 @@
-export const ACCENT = "#ef4444";
-export const ACCENT_DIM = "#7f1d1d";
+export const ACCENT = "#a855f7";
+export const ACCENT_DIM = "#6b21a8";
 
 export function applyTheme() {
   if (typeof document === "undefined") return;

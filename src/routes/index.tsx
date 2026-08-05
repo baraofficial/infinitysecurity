@@ -19,7 +19,7 @@ function Splash() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#0a0a0f] px-5 font-mono">
-      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-[#ef4444]/40 bg-black">
+      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-[#a855f7]/40 bg-black">
         <video
           src={splashVideo.url}
           autoPlay
@@ -30,14 +30,14 @@ function Splash() {
       </div>
 
       <div className="mt-6 w-full max-w-md">
-        <div className="h-1 w-full overflow-hidden rounded bg-[#ef4444]/20">
+        <div className="h-1 w-full overflow-hidden rounded bg-[#a855f7]/20">
           <div
-            className="h-full bg-[#ef4444]"
+            className="h-full bg-[#a855f7]"
             style={{ animation: "loading-bar 11s linear forwards" }}
           />
         </div>
-        <p className="mt-3 text-center text-[11px] tracking-[0.25em] text-[#ef4444]">
-          LOADING BARA AI...
+        <p className="mt-3 text-center text-[11px] tracking-[0.25em] text-[#a855f7]">
+          LOADING BARA AGENT...
         </p>
       </div>
     </div>

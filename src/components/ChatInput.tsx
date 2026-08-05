@@ -8,6 +8,7 @@ interface ChatInputProps {
   attachments?: File[];
   onRemoveAttachment?: (index: number) => void;
   onClearAttachments?: () => void;
+  initialText?: string;
 }
 
 export default function ChatInput({
@@ -17,8 +18,9 @@ export default function ChatInput({
   attachments = [],
   onRemoveAttachment,
   onClearAttachments,
+  initialText = "",
 }: ChatInputProps) {
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(initialText);
   const [menuOpen, setMenuOpen] = useState(false);
   const [githubOpen, setGithubOpen] = useState(false);
   const [repoUrl, setRepoUrl] = useState("");
@@ -27,6 +29,10 @@ export default function ChatInput({
   const cameraRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (initialText) setValue(initialText);
+  }, [initialText]);
 
   // auto-grow up to 7 lines, then scroll
   useEffect(() => {
@@ -102,16 +108,16 @@ export default function ChatInput({
       />
 
       {githubOpen && (
-        <div className="mb-2 rounded-2xl bg-[#12121a] border border-[#ef4444]/30 p-3">
+        <div className="mb-2 rounded-2xl bg-[#12121a] border border-[#a855f7]/30 p-3">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] tracking-widest text-[#ef4444]">
+            <span className="text-[11px] tracking-widest text-[#a855f7]">
               IMPOR REPO GITHUB
             </span>
             <button
               type="button"
               aria-label="close github import"
               onClick={() => setGithubOpen(false)}
-              className="text-[#ef4444]/70 hover:text-white"
+              className="text-[#a855f7]/70 hover:text-white"
             >
               <X size={14} />
             </button>
@@ -127,12 +133,12 @@ export default function ChatInput({
                 }
               }}
               placeholder="https://github.com/user/repo"
-              className="flex-1 min-w-0 bg-[#0a0a0f] border border-[#ef4444]/30 rounded-xl px-3 py-2 text-white text-xs outline-none placeholder:text-gray-500"
+              className="flex-1 min-w-0 bg-[#0a0a0f] border border-[#a855f7]/30 rounded-xl px-3 py-2 text-white text-xs outline-none placeholder:text-gray-500"
             />
             <button
               type="button"
               onClick={submitRepo}
-              className="shrink-0 text-xs px-3 py-2 rounded-xl bg-[#dc2626] hover:bg-[#ef4444] text-white transition"
+              className="shrink-0 text-xs px-3 py-2 rounded-xl bg-[#dc2626] hover:bg-[#a855f7] text-white transition"
             >
               IMPOR
             </button>
@@ -145,12 +151,12 @@ export default function ChatInput({
           {previews.map((p, i) => (
             <div
               key={i}
-              className="relative h-16 w-16 rounded-xl overflow-hidden border border-[#ef4444]/40 bg-[#12121a]"
+              className="relative h-16 w-16 rounded-xl overflow-hidden border border-[#a855f7]/40 bg-[#12121a]"
             >
               {p.url ? (
                 <img src={p.url} alt={p.name} className="h-full w-full object-cover" />
               ) : (
-                <span className="h-full w-full flex items-center justify-center text-[9px] text-[#ef4444] px-1 text-center break-all">
+                <span className="h-full w-full flex items-center justify-center text-[9px] text-[#a855f7] px-1 text-center break-all">
                   {p.name.slice(0, 14)}
                 </span>
               )}
@@ -158,7 +164,7 @@ export default function ChatInput({
                 type="button"
                 aria-label="hapus lampiran"
                 onClick={() => onRemoveAttachment?.(i)}
-                className="absolute top-0.5 right-0.5 h-4 w-4 flex items-center justify-center rounded-full bg-black/70 text-[#ef4444]"
+                className="absolute top-0.5 right-0.5 h-4 w-4 flex items-center justify-center rounded-full bg-black/70 text-[#a855f7]"
               >
                 <X size={10} />
               </button>
@@ -169,19 +175,19 @@ export default function ChatInput({
 
       <div
         ref={wrapRef}
-        className="relative flex items-end gap-2 rounded-2xl bg-[#12121a] border border-[#ef4444]/30 px-2 py-2"
+        className="relative flex items-end gap-2 rounded-2xl bg-[#12121a] border border-[#a855f7]/30 px-2 py-2"
       >
         {menuOpen && (
-          <div className="absolute bottom-full left-0 mb-2 w-56 rounded-2xl bg-[#12121a] border border-[#ef4444]/30 p-2 space-y-1 z-20">
+          <div className="absolute bottom-full left-0 mb-2 w-56 rounded-2xl bg-[#12121a] border border-[#a855f7]/30 p-2 space-y-1 z-20">
             <button
               type="button"
               onClick={() => {
                 setMenuOpen(false);
                 fileRef.current?.click();
               }}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-white hover:bg-[#ef4444]/10 transition"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-white hover:bg-[#a855f7]/10 transition"
             >
-              <Paperclip size={16} className="text-[#ef4444]" /> Upload File
+              <Paperclip size={16} className="text-[#a855f7]" /> Upload File
             </button>
             <button
               type="button"
@@ -189,9 +195,9 @@ export default function ChatInput({
                 setMenuOpen(false);
                 cameraRef.current?.click();
               }}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-white hover:bg-[#ef4444]/10 transition"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-white hover:bg-[#a855f7]/10 transition"
             >
-              <Camera size={16} className="text-[#ef4444]" /> Kamera
+              <Camera size={16} className="text-[#a855f7]" /> Kamera
             </button>
             <button
               type="button"
@@ -199,9 +205,9 @@ export default function ChatInput({
                 setMenuOpen(false);
                 setGithubOpen(true);
               }}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-white hover:bg-[#ef4444]/10 transition"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs text-white hover:bg-[#a855f7]/10 transition"
             >
-              <Github size={16} className="text-[#ef4444]" /> Impor Repo GitHub
+              <Github size={16} className="text-[#a855f7]" /> Impor Repo GitHub
             </button>
           </div>
         )}
@@ -211,11 +217,11 @@ export default function ChatInput({
           aria-label="attachment menu"
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen((v) => !v)}
-          className="shrink-0 h-9 w-9 flex items-center justify-center rounded-full bg-[#ef4444]/10 hover:bg-[#ef4444]/20 transition"
+          className="shrink-0 h-9 w-9 flex items-center justify-center rounded-full bg-[#a855f7]/10 hover:bg-[#a855f7]/20 transition"
         >
           <Plus
             size={18}
-            className={`text-[#ef4444] transition-transform ${menuOpen ? "rotate-45" : ""}`}
+            className={`text-[#a855f7] transition-transform ${menuOpen ? "rotate-45" : ""}`}
           />
         </button>
 
@@ -231,7 +237,7 @@ export default function ChatInput({
               submit();
             }
           }}
-          placeholder="Message Bara AI..."
+          placeholder="Message Bara Agent..."
           disabled={disabled}
           className="flex-1 min-w-0 resize-none bg-transparent text-white text-sm leading-6 py-1.5 outline-none placeholder:text-gray-500 overflow-y-auto"
         />
@@ -241,14 +247,14 @@ export default function ChatInput({
           aria-label="send"
           onClick={submit}
           disabled={!canSend}
-          className="shrink-0 h-9 w-9 flex items-center justify-center rounded-full transition bg-[#dc2626] hover:bg-[#ef4444] disabled:bg-[#7f1d1d]/40 disabled:hover:bg-[#7f1d1d]/40"
+          className="shrink-0 h-9 w-9 flex items-center justify-center rounded-full transition bg-[#dc2626] hover:bg-[#a855f7] disabled:bg-[#6b21a8]/40 disabled:hover:bg-[#6b21a8]/40"
         >
           <Send size={16} className={canSend ? "text-white" : "text-gray-500"} />
         </button>
       </div>
 
       <p className="mt-2 text-center text-[11px] text-gray-500">
-        Bara AI dapat membuat kesalahan. Periksa info penting.
+        Bara Agent dapat membuat kesalahan. Periksa info penting.
       </p>
     </div>
   );

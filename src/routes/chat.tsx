@@ -18,7 +18,7 @@ import {
 import { RenderMessage } from "@/components/CodeBlock";
 import SettingsModal from "@/components/SettingsModal";
 import ChatInput from "@/components/ChatInput";
-import logo from "@/assets/bara-logo.png.asset.json";
+import BottomNav from "@/components/BottomNav";
 
 export const Route = createFileRoute("/chat")({
   ssr: false,
@@ -34,7 +34,7 @@ type Message = {
 };
 
 const DEFAULT_SYSTEM_PROMPT =
-  "Kamu adalah Bara AI, asisten AI yang cerdas, membantu, dan ramah.";
+  "Kamu adalah Bara Agent, asisten AI yang cerdas, membantu, dan ramah.";
 
 const REPO_RE = /(https?:\/\/github\.com\/[^\s]+)/i;
 
@@ -46,11 +46,11 @@ function RepoCard({ url }: { url: string }) {
       href={clean}
       target="_blank"
       rel="noreferrer"
-      className="flex items-center gap-3 border border-[#ef4444]/50 bg-[#0a0a0f] px-3 py-2 rounded-xl hover:bg-[#ef4444]/10 transition"
+      className="flex items-center gap-3 border border-[#a855f7]/50 bg-[#0a0a0f] px-3 py-2 rounded-xl hover:bg-[#a855f7]/10 transition"
     >
-      <Github size={18} className="shrink-0 text-[#ef4444]" />
+      <Github size={18} className="shrink-0 text-[#a855f7]" />
       <span className="min-w-0">
-        <span className="block text-[10px] tracking-widest text-[#ef4444]/70">
+        <span className="block text-[10px] tracking-widest text-[#a855f7]/70">
           GITHUB REPO
         </span>
         <span className="block truncate text-xs text-[#f5f5f5]">
@@ -64,7 +64,7 @@ function RepoCard({ url }: { url: string }) {
 function AssistantActions({ content }: { content: string }) {
   const [vote, setVote] = useState<"up" | "down" | null>(null);
   return (
-    <div className="mt-3 flex items-center gap-1 border-t border-[#ef4444]/20 pt-2">
+    <div className="mt-3 flex items-center gap-1 border-t border-[#a855f7]/20 pt-2">
       <button
         type="button"
         aria-label="salin"
@@ -76,7 +76,7 @@ function AssistantActions({ content }: { content: string }) {
             toast.error("Gagal menyalin");
           }
         }}
-        className="h-7 w-7 flex items-center justify-center rounded-lg text-[#ef4444]/70 hover:text-white hover:bg-[#ef4444]/15 transition"
+        className="h-7 w-7 flex items-center justify-center rounded-lg text-[#a855f7]/70 hover:text-white hover:bg-[#a855f7]/15 transition"
       >
         <Copy size={14} />
       </button>
@@ -87,8 +87,8 @@ function AssistantActions({ content }: { content: string }) {
           setVote("up");
           toast.success("Terima kasih atas feedback-nya");
         }}
-        className={`h-7 w-7 flex items-center justify-center rounded-lg transition hover:bg-[#ef4444]/15 ${
-          vote === "up" ? "text-[#ef4444]" : "text-[#ef4444]/70 hover:text-white"
+        className={`h-7 w-7 flex items-center justify-center rounded-lg transition hover:bg-[#a855f7]/15 ${
+          vote === "up" ? "text-[#a855f7]" : "text-[#a855f7]/70 hover:text-white"
         }`}
       >
         <ThumbsUp size={14} />
@@ -100,8 +100,8 @@ function AssistantActions({ content }: { content: string }) {
           setVote("down");
           toast("Masukan diterima");
         }}
-        className={`h-7 w-7 flex items-center justify-center rounded-lg transition hover:bg-[#ef4444]/15 ${
-          vote === "down" ? "text-[#ef4444]" : "text-[#ef4444]/70 hover:text-white"
+        className={`h-7 w-7 flex items-center justify-center rounded-lg transition hover:bg-[#a855f7]/15 ${
+          vote === "down" ? "text-[#a855f7]" : "text-[#a855f7]/70 hover:text-white"
         }`}
       >
         <ThumbsDown size={14} />
@@ -125,6 +125,15 @@ function ChatPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [isUserScrolling, setIsUserScrolling] = useState(false);
   const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [draft, setDraft] = useState("");
+
+  useEffect(() => {
+    const d = localStorage.getItem("draftPrompt");
+    if (d) {
+      setDraft(d);
+      localStorage.removeItem("draftPrompt");
+    }
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
@@ -363,15 +372,15 @@ function ChatPage() {
   }
 
   return (
-    <div className="flex h-screen bg-[#0a0a0f] text-[#ef4444] font-mono overflow-hidden">
+    <div className="flex h-screen bg-[#0a0a0f] text-[#a855f7] font-mono overflow-hidden">
       {/* Sidebar */}
       <aside
-        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:static z-30 top-0 left-0 h-full w-72 bg-[#0a0a0f] border-r border-[#ef4444]/40 flex flex-col transition-transform`}
+        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:static z-30 top-0 left-0 h-full w-72 bg-[#0a0a0f] border-r border-[#a855f7]/40 flex flex-col transition-transform`}
       >
-        <div className="p-4 border-b border-[#ef4444]/30">
+        <div className="p-4 border-b border-[#a855f7]/30">
           <button
             onClick={newChat}
-            className="w-full border border-[#ef4444] px-3 py-2 text-xs tracking-widest hover:bg-[#ef4444] hover:text-black transition flex items-center gap-2 justify-center rounded-2xl"
+            className="w-full border border-[#a855f7] px-3 py-2 text-xs tracking-widest hover:bg-[#a855f7] hover:text-black transition flex items-center gap-2 justify-center rounded-2xl"
           >
             <Plus size={14} /> NEW CHAT
           </button>
@@ -385,22 +394,22 @@ function ChatPage() {
               key={c.id}
               className={`group flex items-center gap-2 px-3 py-2 border text-xs cursor-pointer transition rounded-2xl ${
                 activeId === c.id
-                  ? "border-[#ef4444] bg-[#ef4444]/10"
-                  : "border-transparent hover:border-[#ef4444]/40"
+                  ? "border-[#a855f7] bg-[#a855f7]/10"
+                  : "border-transparent hover:border-[#a855f7]/40"
               }`}
               onClick={() => {
                 setActiveId(c.id);
                 setSidebarOpen(false);
               }}
             >
-              <MessageSquare size={12} className="shrink-0 text-[#ef4444]/70" />
+              <MessageSquare size={12} className="shrink-0 text-[#a855f7]/70" />
               <span className="truncate flex-1">{c.title}</span>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   deleteChat(c.id);
                 }}
-                className="opacity-0 group-hover:opacity-100 text-[#ef4444]/60 hover:text-white"
+                className="opacity-0 group-hover:opacity-100 text-[#a855f7]/60 hover:text-white"
                 aria-label="delete"
               >
                 <Trash2 size={12} />
@@ -408,10 +417,10 @@ function ChatPage() {
             </div>
           ))}
         </div>
-        <div className="p-3 border-t border-[#ef4444]/30">
+        <div className="p-3 border-t border-[#a855f7]/30">
           <button
             onClick={signOut}
-            className="w-full flex items-center justify-center gap-2 p-3 rounded-2xl border border-[#ef4444]/40 text-[#ef4444] text-xs tracking-widest hover:bg-[#ef4444]/10 transition"
+            className="w-full flex items-center justify-center gap-2 p-3 rounded-2xl border border-[#a855f7]/40 text-[#a855f7] text-xs tracking-widest hover:bg-[#a855f7]/10 transition"
           >
             <LogOut size={16} /> LOG OUT
           </button>
@@ -433,19 +442,14 @@ function ChatPage() {
             type="button"
             onClick={() => setSidebarOpen((v) => !v)}
             aria-label="menu"
-            className="shrink-0 h-11 w-11 flex items-center justify-center bg-[#12121a] border border-[#ef4444]/40 rounded-2xl hover:bg-[#ef4444]/10 transition"
+            className="shrink-0 h-11 w-11 flex items-center justify-center bg-[#12121a] border border-[#a855f7]/40 rounded-2xl hover:bg-[#a855f7]/10 transition"
           >
-            <Menu size={20} className="text-[#ef4444]" />
+            <Menu size={20} className="text-[#a855f7]" />
           </button>
 
-          <div className="flex items-center gap-3 px-5 py-2 bg-[#12121a] border border-[#ef4444]/40 rounded-full">
-            <img
-              src={logo.url}
-              alt="Bara AI logo"
-              className="h-6 w-6 animate-spin-logo"
-            />
-            <span className="text-[#ef4444] text-sm font-bold tracking-widest">
-              BARA AI
+          <div className="flex items-center gap-3 px-5 py-2 bg-[#12121a] border border-[#a855f7]/40 rounded-full">
+            <span className="text-[#a855f7] text-sm font-bold tracking-widest">
+              BARA AGENT
             </span>
           </div>
 
@@ -453,9 +457,9 @@ function ChatPage() {
             type="button"
             onClick={() => setSettingsOpen(true)}
             aria-label="settings"
-            className="shrink-0 h-11 w-11 flex items-center justify-center bg-[#12121a] border border-[#ef4444]/40 rounded-2xl hover:bg-[#ef4444]/10 transition"
+            className="shrink-0 h-11 w-11 flex items-center justify-center bg-[#12121a] border border-[#a855f7]/40 rounded-2xl hover:bg-[#a855f7]/10 transition"
           >
-            <Settings size={20} className="text-[#ef4444]" />
+            <Settings size={20} className="text-[#a855f7]" />
           </button>
         </div>
 
@@ -463,15 +467,10 @@ function ChatPage() {
           {messages.length === 0 && !sending && (
             <div className="h-full flex items-center justify-center text-center px-4">
               <div className="flex flex-col items-center">
-                <img
-                  src={logo.url}
-                  alt="Bara AI logo"
-                  className="h-24 w-24 animate-spin-logo"
-                />
-                <div className="mt-6 text-xl sm:text-2xl text-[#ef4444] tracking-[0.2em]">
-                  Welcome to Bara AI
+                <div className="mt-6 text-xl sm:text-2xl text-[#a855f7] tracking-[0.2em]">
+                  Welcome to Bara Agent
                 </div>
-                <div className="mt-3 text-[10px] sm:text-xs tracking-[0.3em] text-[#ef4444]/70">
+                <div className="mt-3 text-[10px] sm:text-xs tracking-[0.3em] text-[#a855f7]/70">
                   by Bara Official
                 </div>
               </div>
@@ -485,11 +484,11 @@ function ChatPage() {
               <div
                 className={`max-w-[85%] sm:max-w-[70%] text-sm leading-relaxed rounded-2xl ${
                   m.role === "user"
-                    ? "px-4 py-3 border border-[#ef4444]/50 bg-[#ef4444]/10 text-[#f5f5f5]"
-                    : "px-5 py-4 border border-[#ef4444]/40 bg-[#12121a] text-[#f5f5f5]"
+                    ? "px-4 py-3 border border-[#a855f7]/50 bg-[#a855f7]/10 text-[#f5f5f5]"
+                    : "px-5 py-4 border border-[#a855f7]/40 bg-[#12121a] text-[#f5f5f5]"
                 }`}
               >
-                <div className="text-[9px] tracking-widest text-[#ef4444]/70 mb-1">
+                <div className="text-[9px] tracking-widest text-[#a855f7]/70 mb-1">
                   {m.role === "user" ? `> ${username}` : "> bara"}
                 </div>
                 {m.role === "assistant" ? (
@@ -507,14 +506,14 @@ function ChatPage() {
                               key={i}
                               src={mm.url}
                               controls
-                              className="max-w-full rounded-xl border border-[#ef4444]/40"
+                              className="max-w-full rounded-xl border border-[#a855f7]/40"
                             />
                           ) : mm.type === "image" ? (
                             <img
                               key={i}
                               src={mm.url}
                               alt="attachment"
-                              className="max-w-full rounded-xl border border-[#ef4444]/40"
+                              className="max-w-full rounded-xl border border-[#a855f7]/40"
                             />
                           ) : (
                             <a
@@ -522,7 +521,7 @@ function ChatPage() {
                               href={mm.url}
                               target="_blank"
                               rel="noreferrer"
-                              className="block truncate text-xs px-3 py-2 rounded-xl border border-[#ef4444]/40 bg-[#0a0a0f] text-[#f5f5f5]"
+                              className="block truncate text-xs px-3 py-2 rounded-xl border border-[#a855f7]/40 bg-[#0a0a0f] text-[#f5f5f5]"
                             >
                               📄 {mm.name ?? "file"}
                             </a>
@@ -543,7 +542,7 @@ function ChatPage() {
           ))}
           {sending && (
             <div className="flex justify-start">
-              <div className="rounded-2xl border border-[#ef4444]/40 bg-[#12121a] px-4 py-3 text-sm flex items-center gap-2 text-[#ef4444]">
+              <div className="rounded-2xl border border-[#a855f7]/40 bg-[#12121a] px-4 py-3 text-sm flex items-center gap-2 text-[#a855f7]">
                 <span className="inline-block animate-pulse">thinking</span>
 
               </div>
@@ -556,13 +555,14 @@ function ChatPage() {
             type="button"
             onClick={scrollToBottom}
             aria-label="scroll to new messages"
-            className="absolute bottom-20 left-1/2 z-10 -translate-x-1/2 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full bg-[#12121a] border border-[#ef4444]/60 text-[#ef4444] text-xs shadow-[0_0_12px_rgba(239,68,68,0.4)] hover:bg-[#ef4444]/10 transition animate-fade-in"
+            className="absolute bottom-20 left-1/2 z-10 -translate-x-1/2 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full bg-[#12121a] border border-[#a855f7]/60 text-[#a855f7] text-xs shadow-[0_0_12px_rgba(168,85,247,0.4)] hover:bg-[#a855f7]/10 transition animate-fade-in"
           >
             ⬇️ <ChevronDown size={16} />
           </button>
         )}
 
         <ChatInput
+          initialText={draft}
           onSend={send}
           onFiles={(files) => setAttachments((prev) => [...prev, ...files])}
           disabled={sending}
@@ -572,6 +572,7 @@ function ChatPage() {
           }
           onClearAttachments={() => setAttachments([])}
         />
+        <BottomNav />
       </main>
 
       <SettingsModal

@@ -118,7 +118,7 @@ function MarkdownTable({ rows }: { rows: string[] }) {
   const head = splitRow(rows[0]);
   const bodyRows = rows.slice(2).map(splitRow);
   return (
-    <div className="my-2 overflow-x-auto rounded-xl" style={{ border: "1px solid #ef444455" }}>
+    <div className="my-2 overflow-x-auto rounded-xl" style={{ border: "1px solid #a855f755" }}>
       <table className="w-full border-collapse text-xs">
         <thead>
           <tr>
@@ -126,7 +126,7 @@ function MarkdownTable({ rows }: { rows: string[] }) {
               <th
                 key={i}
                 className="px-3 py-2 text-left font-bold whitespace-nowrap"
-                style={{ color: "#ef4444", borderBottom: "1px solid #ef444455", background: "#12121a" }}
+                style={{ color: "#a855f7", borderBottom: "1px solid #a855f755", background: "#12121a" }}
               >
                 {h}
               </th>
@@ -140,7 +140,7 @@ function MarkdownTable({ rows }: { rows: string[] }) {
                 <td
                   key={ci}
                   className="px-3 py-2 align-top text-gray-200"
-                  style={{ borderTop: "1px solid #ef444422" }}
+                  style={{ borderTop: "1px solid #a855f722" }}
                 >
                   {r[ci] ?? ""}
                 </td>

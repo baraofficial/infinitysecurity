@@ -56,12 +56,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Bara AI" },
-      { name: "description", content: "Bara AI — asisten AI cerdas dengan tema gelap merah, dibuat oleh Bara Official." },
-      { property: "og:title", content: "Bara AI" },
-      { name: "twitter:title", content: "Bara AI" },
-      { property: "og:description", content: "Bara AI — asisten AI cerdas dengan tema gelap merah, dibuat oleh Bara Official." },
-      { name: "twitter:description", content: "Bara AI — asisten AI cerdas dengan tema gelap merah, dibuat oleh Bara Official." },
+      { title: "Bara Agent" },
+      { name: "description", content: "Bara Agent — asisten AI cerdas dengan tema gelap merah, dibuat oleh Bara Official." },
+      { property: "og:title", content: "Bara Agent" },
+      { name: "twitter:title", content: "Bara Agent" },
+      { property: "og:description", content: "Bara Agent — asisten AI cerdas dengan tema gelap merah, dibuat oleh Bara Official." },
+      { name: "twitter:description", content: "Bara Agent — asisten AI cerdas dengan tema gelap merah, dibuat oleh Bara Official." },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:type", content: "website" },
     ],
@@ -78,7 +78,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-const THEME_INIT_SCRIPT = `(function(){try{var c='#ef4444';var r=document.documentElement;r.style.setProperty('--accent-color',c);r.style.setProperty('--neon',c);r.style.setProperty('--neon-dim','#7f1d1d');r.style.setProperty('--primary',c);r.style.setProperty('--ring',c);r.style.setProperty('--border',c);r.style.setProperty('--shadow-neon','none');r.style.setProperty('--shadow-neon-sm','none');}catch(e){}})();`;
+const THEME_INIT_SCRIPT = `(function(){try{var c='#a855f7';var r=document.documentElement;r.style.setProperty('--accent-color',c);r.style.setProperty('--neon',c);r.style.setProperty('--neon-dim','#6b21a8');r.style.setProperty('--primary',c);r.style.setProperty('--ring',c);r.style.setProperty('--border',c);r.style.setProperty('--shadow-neon','none');r.style.setProperty('--shadow-neon-sm','none');}catch(e){}})();`;
 
 function RootShell({ children }: { children: ReactNode }) {
   return (

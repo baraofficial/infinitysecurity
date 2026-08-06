@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import BottomNav from "@/components/BottomNav";
 import SettingsModal from "@/components/SettingsModal";
 import { LogOut, Settings, CircleUser } from "lucide-react";
 
@@ -10,14 +9,14 @@ export const Route = createFileRoute("/akun")({
   component: AkunPage,
   head: () => ({
     meta: [
-      { title: "Akun — Bara Agent" },
-      { name: "description", content: "Kelola akun dan pengaturan Bara Agent." },
-      { property: "og:title", content: "Akun — Bara Agent" },
-      { property: "og:description", content: "Kelola akun dan pengaturan Bara Agent." },
+      { title: "Akun — Bara AI" },
+      { name: "description", content: "Kelola akun dan pengaturan Bara AI." },
+      { property: "og:title", content: "Akun — Bara AI" },
+      { property: "og:description", content: "Kelola akun dan pengaturan Bara AI." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Akun — Bara Agent" },
-      { name: "twitter:description", content: "Kelola akun dan pengaturan Bara Agent." },
+      { name: "twitter:title", content: "Akun — Bara AI" },
+      { name: "twitter:description", content: "Kelola akun dan pengaturan Bara AI." },
     ],
   }),
 });
@@ -80,8 +79,6 @@ function AkunPage() {
           <LogOut size={16} /> LOG OUT
         </button>
       </div>
-
-      <BottomNav />
 
       <SettingsModal
         isOpen={settingsOpen}

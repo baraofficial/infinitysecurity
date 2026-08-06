@@ -237,7 +237,7 @@ export default function ChatInput({
               submit();
             }
           }}
-          placeholder="Message Bara Agent..."
+          placeholder="Message Bara AI..."
           disabled={disabled}
           className="flex-1 min-w-0 resize-none bg-transparent text-white text-sm leading-6 py-1.5 outline-none placeholder:text-gray-500 overflow-y-auto"
         />
@@ -254,7 +254,7 @@ export default function ChatInput({
       </div>
 
       <p className="mt-2 text-center text-[11px] text-gray-500">
-        Bara Agent dapat membuat kesalahan. Periksa info penting.
+        Bara AI dapat membuat kesalahan. Periksa info penting.
       </p>
     </div>
   );

@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import BottomNav from "@/components/BottomNav";
 import {
   Globe,
   NotebookPen,
@@ -23,23 +22,23 @@ export const Route = createFileRoute("/tools")({
   component: ToolsPage,
   head: () => ({
     meta: [
-      { title: "Tools — Bara Agent" },
+      { title: "Tools — Bara AI" },
       {
         name: "description",
         content:
-          "Katalog tools Bara Agent: browser, catatan, GitHub connector, code editor, file manager, image generator, database, dan lainnya.",
+          "Katalog tools Bara AI: browser, catatan, GitHub connector, code editor, file manager, image generator, database, dan lainnya.",
       },
-      { property: "og:title", content: "Tools — Bara Agent" },
+      { property: "og:title", content: "Tools — Bara AI" },
       {
         property: "og:description",
-        content: "Katalog tools agent Bara Agent dengan tema gelap ungu futuristik.",
+        content: "Katalog tools agent Bara AI dengan tema gelap ungu futuristik.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Tools — Bara Agent" },
+      { name: "twitter:title", content: "Tools — Bara AI" },
       {
         name: "twitter:description",
-        content: "Katalog tools agent Bara Agent dengan tema gelap ungu futuristik.",
+        content: "Katalog tools agent Bara AI dengan tema gelap ungu futuristik.",
       },
     ],
   }),
@@ -170,7 +169,7 @@ function ToolsPage() {
       <header className="shrink-0 border-b border-[#a855f7]/25 px-4 py-4">
         <h1 className="text-sm tracking-[0.3em] text-[#a855f7]">TOOLS</h1>
         <p className="mt-1 text-[11px] text-[#a1a1aa]">
-          {TOOLS.length} tools tersedia untuk Bara Agent
+          {TOOLS.length} tools tersedia untuk Bara AI
         </p>
       </header>
 
@@ -234,8 +233,6 @@ function ToolsPage() {
           ))}
         </div>
       </div>
-
-      <BottomNav />
     </div>
   );
 }

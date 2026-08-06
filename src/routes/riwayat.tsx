@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import BottomNav from "@/components/BottomNav";
 import { MessageSquare, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/riwayat")({
@@ -9,14 +8,14 @@ export const Route = createFileRoute("/riwayat")({
   component: RiwayatPage,
   head: () => ({
     meta: [
-      { title: "Riwayat — Bara Agent" },
-      { name: "description", content: "Riwayat percakapan Bara Agent milik kamu." },
-      { property: "og:title", content: "Riwayat — Bara Agent" },
-      { property: "og:description", content: "Riwayat percakapan Bara Agent milik kamu." },
+      { title: "Riwayat — Bara AI" },
+      { name: "description", content: "Riwayat percakapan Bara AI milik kamu." },
+      { property: "og:title", content: "Riwayat — Bara AI" },
+      { property: "og:description", content: "Riwayat percakapan Bara AI milik kamu." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Riwayat — Bara Agent" },
-      { name: "twitter:description", content: "Riwayat percakapan Bara Agent milik kamu." },
+      { name: "twitter:title", content: "Riwayat — Bara AI" },
+      { name: "twitter:description", content: "Riwayat percakapan Bara AI milik kamu." },
     ],
   }),
 });
@@ -85,8 +84,6 @@ function RiwayatPage() {
           </div>
         ))}
       </div>
-
-      <BottomNav />
     </div>
   );
 }

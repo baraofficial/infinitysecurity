@@ -14,6 +14,8 @@ import {
   ThumbsDown,
   Github,
   ChevronDown,
+  MoreVertical,
+  Share2,
 } from "lucide-react";
 import { RenderMessage } from "@/components/CodeBlock";
 import SettingsModal from "@/components/SettingsModal";
@@ -125,6 +127,21 @@ function ChatPage() {
   const [isUserScrolling, setIsUserScrolling] = useState(false);
   const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [draft, setDraft] = useState("");
+  const [menuId, setMenuId] = useState<string | null>(null);
+
+  async function shareChat(c: Conversation) {
+    const url = `${window.location.origin}/chat?c=${c.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: c.title, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link disalin");
+      }
+    } catch {
+      /* dibatalkan */
+    }
+  }
 
   useEffect(() => {
     const d = localStorage.getItem("draftPrompt");
@@ -391,7 +408,7 @@ function ChatPage() {
           {conversations.map((c) => (
             <div
               key={c.id}
-              className={`group flex items-center gap-2 px-3 py-2 border text-xs cursor-pointer transition rounded-2xl ${
+              className={`group relative flex items-center gap-2 px-3 py-2 border text-xs cursor-pointer transition rounded-2xl ${
                 activeId === c.id
                   ? "border-[#a855f7] bg-[#a855f7]/10"
                   : "border-transparent hover:border-[#a855f7]/40"
@@ -406,13 +423,41 @@ function ChatPage() {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  deleteChat(c.id);
+                  setMenuId((prev) => (prev === c.id ? null : c.id));
                 }}
-                className="opacity-0 group-hover:opacity-100 text-[#a855f7]/60 hover:text-white"
-                aria-label="delete"
+                className="shrink-0 text-[#a855f7]/70 hover:text-white"
+                aria-label="opsi"
               >
-                <Trash2 size={12} />
+                <MoreVertical size={14} />
               </button>
+
+              {menuId === c.id && (
+                <div
+                  className="absolute right-2 top-full z-40 mt-1 w-36 overflow-hidden rounded-xl border border-[#a855f7]/50 bg-[#12121a]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuId(null);
+                      deleteChat(c.id);
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-[#f5f5f5] hover:bg-[#a855f7]/15"
+                  >
+                    <Trash2 size={13} className="text-[#a855f7]" /> Delete
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuId(null);
+                      shareChat(c);
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-[#f5f5f5] hover:bg-[#a855f7]/15"
+                  >
+                    <Share2 size={13} className="text-[#a855f7]" /> Bagikan
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>

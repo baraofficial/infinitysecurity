@@ -127,6 +127,21 @@ function ChatPage() {
   const [isUserScrolling, setIsUserScrolling] = useState(false);
   const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [draft, setDraft] = useState("");
+  const [menuId, setMenuId] = useState<string | null>(null);
+
+  async function shareChat(c: Conversation) {
+    const url = `${window.location.origin}/chat?c=${c.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: c.title, url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link disalin");
+      }
+    } catch {
+      /* dibatalkan */
+    }
+  }
 
   useEffect(() => {
     const d = localStorage.getItem("draftPrompt");

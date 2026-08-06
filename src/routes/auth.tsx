@@ -35,7 +35,7 @@ function AuthPage() {
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f] px-4 font-mono">
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center text-center">
-          <h1 className="mt-6 text-2xl text-[#a855f7] tracking-[0.3em]">BARA AGENT</h1>
+          <h1 className="mt-6 text-2xl text-[#a855f7] tracking-[0.3em]">BARA AI</h1>
         </div>
         <div className="rounded-2xl border border-[#a855f7]/40 bg-[#12121a] p-6 sm:p-8">
           <p className="text-center text-[#a855f7] tracking-widest text-sm mb-6">Sign in with</p>

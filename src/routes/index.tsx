@@ -6,20 +6,20 @@ export const Route = createFileRoute("/")({
   component: Splash,
   head: () => ({
     meta: [
-      { title: "Bara Agent — AI Agent Serbaguna" },
+      { title: "Bara AI — AI Agent Serbaguna" },
       {
         name: "description",
         content:
-          "Bara Agent: AI agent dengan tools browser, catatan, GitHub, code editor, database, dan deploy. Tema gelap ungu futuristik.",
+          "Bara AI: AI agent dengan tools browser, catatan, GitHub, code editor, database, dan deploy. Tema gelap ungu futuristik.",
       },
-      { property: "og:title", content: "Bara Agent — AI Agent Serbaguna" },
+      { property: "og:title", content: "Bara AI — AI Agent Serbaguna" },
       {
         property: "og:description",
         content: "AI agent dengan tools browser, GitHub, code editor, database, dan deploy.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Bara Agent — AI Agent Serbaguna" },
+      { name: "twitter:title", content: "Bara AI — AI Agent Serbaguna" },
       {
         name: "twitter:description",
         content: "AI agent dengan tools browser, GitHub, code editor, database, dan deploy.",
@@ -38,7 +38,7 @@ function Splash() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-[#0a0a0f] px-5 font-mono">
-      <h1 className="text-2xl tracking-[0.35em] text-[#a855f7]">BARA AGENT</h1>
+      <h1 className="text-2xl tracking-[0.35em] text-[#a855f7]">BARA AI</h1>
       <p className="mt-3 text-[11px] tracking-[0.3em] text-[#a855f7]/60">AI AGENT SYSTEM</p>
 
       <div className="mt-8 w-full max-w-xs">

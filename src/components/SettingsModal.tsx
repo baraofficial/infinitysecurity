@@ -12,7 +12,7 @@ interface SettingsModalProps {
 }
 
 const DEFAULT_SYSTEM_PROMPT =
-  'Kamu adalah Bara Agent, asisten AI yang cerdas, membantu, dan ramah.';
+  'Kamu adalah Bara AI, asisten AI yang cerdas, membantu, dan ramah.';
 
 export default function SettingsModal({
   isOpen,

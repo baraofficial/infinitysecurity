@@ -18,7 +18,6 @@ import {
 import { RenderMessage } from "@/components/CodeBlock";
 import SettingsModal from "@/components/SettingsModal";
 import ChatInput from "@/components/ChatInput";
-import BottomNav from "@/components/BottomNav";
 
 export const Route = createFileRoute("/chat")({
   ssr: false,
@@ -34,7 +33,7 @@ type Message = {
 };
 
 const DEFAULT_SYSTEM_PROMPT =
-  "Kamu adalah Bara Agent, asisten AI yang cerdas, membantu, dan ramah.";
+  "Kamu adalah Bara AI, asisten AI yang cerdas, membantu, dan ramah.";
 
 const REPO_RE = /(https?:\/\/github\.com\/[^\s]+)/i;
 
@@ -449,7 +448,7 @@ function ChatPage() {
 
           <div className="flex items-center gap-3 px-5 py-2 bg-[#12121a] border border-[#a855f7]/40 rounded-full">
             <span className="text-[#a855f7] text-sm font-bold tracking-widest">
-              BARA AGENT
+              BARA AI
             </span>
           </div>
 
@@ -468,7 +467,7 @@ function ChatPage() {
             <div className="h-full flex items-center justify-center text-center px-4">
               <div className="flex flex-col items-center">
                 <div className="mt-6 text-xl sm:text-2xl text-[#a855f7] tracking-[0.2em]">
-                  Welcome to Bara Agent
+                  Welcome to Bara AI
                 </div>
                 <div className="mt-3 text-[10px] sm:text-xs tracking-[0.3em] text-[#a855f7]/70">
                   by Bara Official
@@ -572,7 +571,6 @@ function ChatPage() {
           }
           onClearAttachments={() => setAttachments([])}
         />
-        <BottomNav />
       </main>
 
       <SettingsModal

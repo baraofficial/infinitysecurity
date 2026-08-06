@@ -1,23 +1,22 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import BottomNav from "@/components/BottomNav";
 
 export const Route = createFileRoute("/prompt")({
   ssr: false,
   component: PromptPage,
   head: () => ({
     meta: [
-      { title: "Prompt — Bara Agent" },
+      { title: "Prompt — Bara AI" },
       {
         name: "description",
-        content: "Kumpulan prompt siap pakai untuk Bara Agent, langsung kirim ke chat.",
+        content: "Kumpulan prompt siap pakai untuk Bara AI, langsung kirim ke chat.",
       },
-      { property: "og:title", content: "Prompt — Bara Agent" },
-      { property: "og:description", content: "Kumpulan prompt siap pakai untuk Bara Agent." },
+      { property: "og:title", content: "Prompt — Bara AI" },
+      { property: "og:description", content: "Kumpulan prompt siap pakai untuk Bara AI." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Prompt — Bara Agent" },
-      { name: "twitter:description", content: "Kumpulan prompt siap pakai untuk Bara Agent." },
+      { name: "twitter:title", content: "Prompt — Bara AI" },
+      { name: "twitter:description", content: "Kumpulan prompt siap pakai untuk Bara AI." },
     ],
   }),
 });
@@ -64,8 +63,6 @@ function PromptPage() {
           </button>
         ))}
       </div>
-
-      <BottomNav />
     </div>
   );
 }

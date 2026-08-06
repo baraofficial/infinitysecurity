@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { X, Trash2, User } from 'lucide-react';
+import { X, Trash2, User, Database } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -14,6 +15,8 @@ interface SettingsModalProps {
 const DEFAULT_SYSTEM_PROMPT =
   'Kamu adalah Bara AI, asisten AI yang cerdas, membantu, dan ramah.';
 
+const PROTECTED_KEYS = ['theme'];
+
 export default function SettingsModal({
   isOpen,
   onClose,
@@ -23,11 +26,22 @@ export default function SettingsModal({
 }: SettingsModalProps) {
   const [tempUsername, setTempUsername] = useState(username);
   const [systemPrompt, setSystemPrompt] = useState<string>('');
+  const [email, setEmail] = useState('');
+  const [avatar, setAvatar] = useState('');
+  const [confirm, setConfirm] = useState<null | 'chat' | 'data'>(null);
 
   useEffect(() => {
     if (isOpen) {
       setTempUsername(username);
       setSystemPrompt(localStorage.getItem('systemPrompt') || DEFAULT_SYSTEM_PROMPT);
+      supabase.auth.getUser().then(({ data }) => {
+        const u = data.user;
+        if (!u) return;
+        setEmail(u.email ?? '');
+        const meta = u.user_metadata as Record<string, unknown> | null;
+        const pic = (meta?.avatar_url || meta?.picture) as string | undefined;
+        setAvatar(pic || '');
+      });
     }
   }, [isOpen, username]);
 
@@ -36,6 +50,21 @@ export default function SettingsModal({
     localStorage.setItem('currentUser', tempUsername);
     localStorage.setItem('systemPrompt', systemPrompt);
     toast.success('Settings updated');
+    onClose();
+  };
+
+  const runConfirm = () => {
+    if (confirm === 'chat') {
+      onClearChat();
+      toast.success('Chat deleted');
+    } else if (confirm === 'data') {
+      Object.keys(localStorage)
+        .filter((k) => !PROTECTED_KEYS.includes(k))
+        .forEach((k) => localStorage.removeItem(k));
+      onClearChat();
+      toast.success('Data deleted');
+    }
+    setConfirm(null);
     onClose();
   };
 
@@ -63,6 +92,27 @@ export default function SettingsModal({
         </div>
 
         <div className="flex-1 space-y-4 overflow-y-auto px-5 py-5">
+          {/* Google account */}
+          {(email || avatar) && (
+            <div className="flex items-center gap-3 rounded-2xl border border-[#a855f7]/40 bg-[#0a0a0f] px-4 py-3">
+              {avatar ? (
+                <img
+                  src={avatar}
+                  alt="Foto profil Google"
+                  className="h-10 w-10 rounded-full border border-[#a855f7]/50 object-cover"
+                />
+              ) : (
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[#a855f7]/50">
+                  <User size={16} className="text-[#a855f7]" />
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="truncate text-sm text-white">{username}</p>
+                <p className="truncate text-[11px] text-[#71717a]">{email}</p>
+              </div>
+            </div>
+          )}
+
           {/* Username */}
           <div>
             <label className="mb-2 block text-xs tracking-widest text-[#a855f7]">USERNAME</label>
@@ -91,10 +141,17 @@ export default function SettingsModal({
           </div>
 
           <button
-            onClick={onClearChat}
+            onClick={() => setConfirm('chat')}
             className="flex w-full items-center justify-center gap-2 rounded-full border border-[#a855f7]/50 bg-transparent px-4 py-3 text-sm text-[#a855f7] hover:bg-[#a855f7]/10"
           >
-            <Trash2 size={16} /> Clear Chat
+            <Trash2 size={16} /> Delete Chat
+          </button>
+
+          <button
+            onClick={() => setConfirm('data')}
+            className="flex w-full items-center justify-center gap-2 rounded-full border border-[#a855f7]/50 bg-transparent px-4 py-3 text-sm text-[#a855f7] hover:bg-[#a855f7]/10"
+          >
+            <Database size={16} /> Delete Data
           </button>
         </div>
 
@@ -113,6 +170,30 @@ export default function SettingsModal({
           </button>
         </div>
       </aside>
+
+      {/* Confirmation popup */}
+      {confirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 px-6 backdrop-blur-sm">
+          <div className="w-full max-w-xs rounded-2xl border border-[#a855f7]/50 bg-[#12121a] p-5 text-center">
+            <p className="text-sm text-white">Are you sure you want to delete?</p>
+            <p className="mt-1 text-[11px] text-[#71717a]">This action cannot be undone.</p>
+            <div className="mt-5 flex gap-[10px]">
+              <button
+                onClick={() => setConfirm(null)}
+                className="flex-1 rounded-full border border-[#a855f7]/50 px-4 py-3 text-xs tracking-widest text-[#a855f7] hover:bg-[#a855f7]/10"
+              >
+                CANCEL
+              </button>
+              <button
+                onClick={runConfirm}
+                className="flex-1 rounded-full bg-[#ef4444] px-4 py-3 text-xs font-bold tracking-widest text-white hover:brightness-110"
+              >
+                DELETE
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

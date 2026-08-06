@@ -14,6 +14,8 @@ import {
   ThumbsDown,
   Github,
   ChevronDown,
+  MoreVertical,
+  Share2,
 } from "lucide-react";
 import { RenderMessage } from "@/components/CodeBlock";
 import SettingsModal from "@/components/SettingsModal";

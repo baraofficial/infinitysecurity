@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Code2, Copy, Check, Eye, EyeOff } from "lucide-react";
+import { Code2, Copy, Check, Eye, X } from "lucide-react";
 
 function escapeHtml(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

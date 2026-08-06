@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Code2, Copy, Check, Eye, EyeOff } from "lucide-react";
+import { Code2, Copy, Check, Eye, X } from "lucide-react";
 
 function escapeHtml(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -30,7 +30,7 @@ function highlight(code: string, lang: string) {
 }
 
 export function CodeBlock({ code, lang }: { code: string; lang: string }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -61,12 +61,12 @@ export function CodeBlock({ code, lang }: { code: string; lang: string }) {
         <div className="flex items-center gap-1 shrink-0">
           <button
             type="button"
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => setOpen(true)}
             className="flex items-center gap-1 px-2 py-1 text-[10px] tracking-widest rounded hover:bg-neon/10"
             style={{ color: "#a855f7", border: "1px solid #a855f733" }}
           >
-            {open ? <EyeOff size={11} /> : <Eye size={11} />}
-            {open ? "HIDE" : "VIEW CODE"}
+            <Eye size={11} />
+            VIEW CODE
           </button>
           <button
             type="button"
@@ -79,22 +79,63 @@ export function CodeBlock({ code, lang }: { code: string; lang: string }) {
           </button>
         </div>
       </div>
+
       {open && (
         <div
-          className="code-body"
-          style={{
-            overflowX: "auto",
-            whiteSpace: "pre",
-            fontFamily: "'Fira Code', 'JetBrains Mono', ui-monospace, monospace",
-            fontSize: "13px",
-            lineHeight: 1.6,
-            padding: "12px",
-            color: "#e9d5ff",
-          }}
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }}
+          onClick={() => setOpen(false)}
         >
-          <code dangerouslySetInnerHTML={{ __html: highlight(code, lang) }} />
+          <div className="relative w-full max-w-3xl" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="close"
+              className="absolute -top-11 right-0 flex h-9 w-9 items-center justify-center rounded-full"
+              style={{ background: "#12121a", border: "1px solid #a855f7", color: "#a855f7" }}
+            >
+              <X size={18} />
+            </button>
+            <div
+              className="overflow-hidden rounded-xl"
+              style={{ background: "#111119", border: "1px solid #a855f7" }}
+            >
+              <div
+                className="flex items-center justify-between gap-2 px-3 py-2"
+                style={{ borderBottom: "1px solid #a855f733" }}
+              >
+                <span className="text-xs tracking-widest" style={{ color: "#c084fc" }}>
+                  {label} CODE
+                </span>
+                <button
+                  type="button"
+                  onClick={copy}
+                  className="flex items-center gap-1 rounded px-2 py-1 text-[10px] tracking-widest"
+                  style={{ color: "#a855f7", border: "1px solid #a855f733" }}
+                >
+                  {copied ? <Check size={11} /> : <Copy size={11} />}
+                  {copied ? "COPIED!" : "COPY CODE"}
+                </button>
+              </div>
+              <div
+                style={{
+                  overflow: "auto",
+                  maxHeight: "70vh",
+                  whiteSpace: "pre",
+                  fontFamily: "'Fira Code', 'JetBrains Mono', ui-monospace, monospace",
+                  fontSize: "13px",
+                  lineHeight: 1.6,
+                  padding: "12px",
+                  color: "#e9d5ff",
+                }}
+              >
+                <code dangerouslySetInnerHTML={{ __html: highlight(code, lang) }} />
+              </div>
+            </div>
+          </div>
         </div>
       )}
+
     </div>
   );
 }

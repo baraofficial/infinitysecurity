@@ -30,7 +30,7 @@ function highlight(code: string, lang: string) {
 }
 
 export function CodeBlock({ code, lang }: { code: string; lang: string }) {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   async function copy() {

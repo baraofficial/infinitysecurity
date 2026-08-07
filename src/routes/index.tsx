@@ -35,7 +35,7 @@ function Splash() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const t = setTimeout(() => navigate({ to: "/auth" }), 2200);
+    const t = setTimeout(() => navigate({ to: "/auth" }), 21000);
     return () => clearTimeout(t);
   }, [navigate]);
 
@@ -56,7 +56,7 @@ function Splash() {
         <div className="h-1 w-full overflow-hidden rounded bg-[#a855f7]/20">
           <div
             className="h-full bg-[#a855f7]"
-            style={{ animation: "loading-bar 2.2s linear forwards" }}
+            style={{ animation: "loading-bar 21s linear forwards" }}
           />
         </div>
       </div>

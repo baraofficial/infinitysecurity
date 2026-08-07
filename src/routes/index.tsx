@@ -28,6 +28,9 @@ export const Route = createFileRoute("/")({
   }),
 });
 
+const SPLASH_VIDEO =
+  "https://www.image2url.com/r2/default/videos/1785590870389-70e9c4c2-297c-44e5-a9c8-0b22af07145c.mp4";
+
 function Splash() {
   const navigate = useNavigate();
 
@@ -38,8 +41,16 @@ function Splash() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-[#0a0a0f] px-5 font-mono">
-      <h1 className="text-2xl tracking-[0.35em] text-[#a855f7]">BARA AI</h1>
-      <p className="mt-3 text-[11px] tracking-[0.3em] text-[#a855f7]/60">AI AGENT SYSTEM</p>
+      <div className="w-full max-w-sm overflow-hidden rounded-xl border border-[#a855f7]/40 bg-black">
+        <video
+          src={SPLASH_VIDEO}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="aspect-video h-full w-full object-cover"
+        />
+      </div>
 
       <div className="mt-8 w-full max-w-xs">
         <div className="h-1 w-full overflow-hidden rounded bg-[#a855f7]/20">
@@ -50,7 +61,7 @@ function Splash() {
         </div>
       </div>
 
-      <p className="absolute bottom-8 text-[10px] tracking-[0.25em] text-[#a855f7]/50">
+      <p className="absolute bottom-8 text-[10px] font-bold tracking-[0.25em] text-[#c084fc]">
         created by Bara Official
       </p>
     </div>

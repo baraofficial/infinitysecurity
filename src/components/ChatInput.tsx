@@ -34,15 +34,13 @@ export default function ChatInput({
     if (initialText) setValue(initialText);
   }, [initialText]);
 
-  // auto-grow up to 7 lines, then scroll
+  // auto-grow without max line limit
   useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
-    const line = 24;
-    const max = line * 7;
     el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, max)}px`;
-    el.style.overflowY = el.scrollHeight > max ? "auto" : "hidden";
+    el.style.height = `${el.scrollHeight}px`;
+    el.style.overflowY = "hidden";
   }, [value]);
 
   const attachmentCount = attachments.length;

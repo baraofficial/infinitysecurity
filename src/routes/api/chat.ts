@@ -14,7 +14,7 @@ Core behavior:
 - Match the user's language automatically (Indonesian, English, etc.).
 - Use markdown when it improves readability. Keep a light, modern tone — no unnecessary jargon, no filler.
 - Whenever the user asks for a comparison (e.g. "perbandingan ChatGPT vs Claude"), ALWAYS include a markdown table (| header | header | with a |---|---| separator row) summarizing the differences.
-- Whenever the user asks you to write a prompt, put the final prompt inside a fenced code block (\`\`\`prompt ... \`\`\`) so it can be copied.
+- Whenever the user asks you to write a prompt, put the final prompt inside a fenced code block (```prompt ... ``` ) so it can be copied.
 - Put real code inside fenced code blocks with the correct language tag. Never wrap comparison tables inside code blocks.`;
 
 export const Route = createFileRoute("/api/chat")({
@@ -27,9 +27,9 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("Unauthorized", { status: 401 });
         }
 
-        const apiKey = process.env.LOVABLE_API_KEY;
+        const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
-          return new Response("Missing LOVABLE_API_KEY", { status: 500 });
+          return new Response("Missing GEMINI_API_KEY", { status: 500 });
         }
 
         const body = (await request.json()) as { messages?: ChatMessage[] };
@@ -37,20 +37,34 @@ export const Route = createFileRoute("/api/chat")({
           return new Response("messages required", { status: 400 });
         }
 
-        const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        // Build the contents array in the format expected by Google Generative API
+        const lastMessages = body.messages.slice(-30).map((m) => ({
+          role: m.role,
+          parts: [{ text: m.content }],
+        }));
+
+        const payload = {
+          // adjust parameters as needed
+          temperature: 0.2,
+          max_output_tokens: 1024,
+          top_p: 0.95,
+          candidate_count: 1,
+          contents: [
+            { role: "system", parts: [{ text: SYSTEM_PROMPT }] },
+            ...lastMessages,
+          ],
+        };
+
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:streamGenerateContent?key=${encodeURIComponent(
+          apiKey,
+        )}`;
+
+        const res = await fetch(endpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Lovable-API-Key": apiKey,
           },
-          body: JSON.stringify({
-            model: "google/gemini-2.5-pro",
-            stream: true,
-            messages: [
-              { role: "system", content: SYSTEM_PROMPT },
-              ...body.messages.slice(-30),
-            ],
-          }),
+          body: JSON.stringify(payload),
         });
 
         if (!res.ok || !res.body) {
@@ -60,6 +74,7 @@ export const Route = createFileRoute("/api/chat")({
           return new Response(text || "AI request failed", { status: res.status || 500 });
         }
 
+        // Proxy the streaming response (SSE) from Google's streaming endpoint
         return new Response(res.body, {
           headers: {
             "Content-Type": "text/event-stream; charset=utf-8",
@@ -72,4 +87,3 @@ export const Route = createFileRoute("/api/chat")({
     },
   },
 });
-

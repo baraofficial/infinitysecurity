@@ -37,7 +37,8 @@ type Message = {
 const DEFAULT_SYSTEM_PROMPT =
   "Kamu adalah Bara AI, asisten AI yang cerdas, membantu, dan ramah.";
 
-const REPO_RE = /(https?:\/\/github\.com\/[^\\s]+)/i;
+const REPO_RE = /(https?:\/\/github\.com\/[^
+\s]+)/i;
 
 function RepoCard({ url }: { url: string }) {
   const clean = url.replace(/[.,)]+$/, "");
@@ -151,45 +152,25 @@ function ChatPage() {
     }
   }, []);
 
-  // Modified: allow guest/unauthenticated access to avoid redirect loop with /auth
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
-      if (data.session) {
-        setUserId(data.session.user.id);
-        const { data: p } = await supabase
-          .from("profiles")
-          .select("username")
-          .eq("id", data.session.user.id)
-          .maybeSingle();
-        setUsername(p?.username || data.session.user.email?.split("@")[0] || "user");
-      } else {
-        // guest mode
-        setUserId(null);
-        setUsername("guest");
+      if (!data.session) {
+        navigate({ to: "/auth" });
+        return;
       }
+      setUserId(data.session.user.id);
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", data.session.user.id)
+        .maybeSingle();
+      setUsername(p?.username || data.session.user.email?.split("@")[0] || "user");
     });
-
     const { data: sub } = supabase.auth.onAuthStateChange((_e, sess) => {
-      if (!sess) {
-        setUserId(null);
-        setUsername("guest");
-      } else {
-        setUserId(sess.user.id);
-        // attempt to load profile username
-        supabase
-          .from("profiles")
-          .select("username")
-          .eq("id", sess.user.id)
-          .maybeSingle()
-          .then(({ data }) => {
-            if (data?.username) setUsername(data.username);
-          })
-          .catch(() => {});
-      }
+      if (!sess) navigate({ to: "/auth" });
     });
-
     return () => sub.subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
   const loadConversations = useCallback(async () => {
     if (!userId) return;
@@ -218,25 +199,34 @@ function ChatPage() {
     else setMessages([]);
   }, [activeId, loadMessages]);
 
+  // Auto-scroll: only when user isn't actively scrolling; use auto behavior to reduce repaint
   useEffect(() => {
-    scrollRef.current?.scrollTo({
-      top: scrollRef.current.scrollHeight,
-      behavior: "smooth",
-    });
-  }, [messages, sending]);
+    const el = scrollRef.current;
+    if (!el) return;
+    if (isUserScrolling) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "auto" });
+  }, [messages, sending, isUserScrolling]);
 
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
 
+    let userScrollTimeout: ReturnType<typeof setTimeout> | null = null;
     const handleScroll = () => {
-      const nearBottom =
-        el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+      // mark user scrolling briefly
+      setIsUserScrolling(true);
+      if (userScrollTimeout) clearTimeout(userScrollTimeout);
+      userScrollTimeout = setTimeout(() => setIsUserScrolling(false), 700);
+
+      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
       setShowScrollBtn(!nearBottom);
     };
 
     el.addEventListener("scroll", handleScroll, { passive: true });
-    return () => el.removeEventListener("scroll", handleScroll);
+    return () => {
+      if (userScrollTimeout) clearTimeout(userScrollTimeout);
+      el.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   function scrollToBottom() {
@@ -271,14 +261,14 @@ function ChatPage() {
   }
 
   async function send(text: string) {
-    if ((!text && attachments.length === 0) || sending) return;
+    if ((!text && attachments.length === 0) || sending || !userId) return;
     const titleText =
       text || (attachments.length ? `[${attachments.length} media]` : "chat");
     setSending(true);
 
     let convId = activeId;
     try {
-      if (!convId && userId) {
+      if (!convId) {
         const { data: conv, error } = await supabase
           .from("conversations")
           .insert({ user_id: userId, title: titleText.slice(0, 40) })
@@ -307,14 +297,12 @@ function ChatPage() {
       setMessages((m) => [...m, userMsg]);
       setAttachments([]);
 
-      if (userId) {
-        await supabase.from("messages").insert({
-          conversation_id: convId,
-          user_id: userId,
-          role: "user",
-          content: text,
-        });
-      }
+      await supabase.from("messages").insert({
+        conversation_id: convId,
+        user_id: userId,
+        role: "user",
+        content: text,
+      });
 
       const systemPrompt =
         localStorage.getItem("systemPrompt") || DEFAULT_SYSTEM_PROMPT;
@@ -384,20 +372,19 @@ function ChatPage() {
         );
       }
 
-      if (userId) {
-        await supabase.from("messages").insert({
-          conversation_id: convId,
-          user_id: userId,
-          role: "assistant",
-          content,
-        });
+      await supabase.from("messages").insert({
+        conversation_id: convId,
+        user_id: userId,
+        role: "assistant",
+        content,
+      });
 
-        await supabase
-          .from("conversations")
-          .update({ updated_at: new Date().toISOString() })
-          .eq("id", convId);
-        loadConversations();
-      }
+
+      await supabase
+        .from("conversations")
+        .update({ updated_at: new Date().toISOString() })
+        .eq("id", convId);
+      loadConversations();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "send failed");
     } finally {
@@ -407,18 +394,13 @@ function ChatPage() {
 
   async function signOut() {
     await supabase.auth.signOut();
-    // stay on page (no redirect) when signed out
-    setUserId(null);
-    setUsername("guest");
+    navigate({ to: "/auth" });
   }
 
   return (
     <div className="flex h-screen bg-[#0a0a0f] text-[#a855f7] font-mono overflow-hidden">
       {/* Sidebar */}
       <aside
-        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:static z-30 top-0 left-0 h-full w-72 bg-[#0a0a0f] border-r border-[#a855f7]/40 flex flex-col t[...]`,
-    message: "fix: avoid redirect loop by allowing guest access in chat (no redirect to /auth)",
-    owner: "baraofficial",
-    path: "src/routes/chat.tsx",
-    repo: "infinitysecurity",
-    sha: "c02c01744a23103ac04b4fabd61fda725fffd486"}EOF}]}]}})BEGIN_OUTPUT_SUCCESSION_TOKEN_PLACEHOLDER_BLOCK_OUTPUT_SESSION_MARKER_SIGNATURE_UPDATED_CONTINUE_STREAM_ABORT_NOTICE_FAILURE_PLUGIN_INVOCATION_UNKNOWN_SYMBOLS_TRANSLATION_WARNINGCONTINUE_STREAM_ABORT_TOKEN_OUTPUT_CORRUPTED_RESPONSEPLEASE_RESEND_FILE_CONTENT_OR_TRY_AGAIN>}'```}]}]}]}]}]}]}]}]}]}]}]}]}}]}]}}}]}]}]}]}]}]}]}}}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}
+        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:static z-30 top-0 left-0 h-full w-72 bg-[#0a0a0f] border-r border-[#a855f7]/40 flex flex-col t[...]
+  );
+}

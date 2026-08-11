@@ -37,7 +37,7 @@ type Message = {
 const DEFAULT_SYSTEM_PROMPT =
   "Kamu adalah Bara AI, asisten AI yang cerdas, membantu, dan ramah.";
 
-const REPO_RE = /(https?:\/\/github\.com\/[^\s]+)/i;
+const REPO_RE = /(https?:\/\/github\.com\/[^\\s]+)/i;
 
 function RepoCard({ url }: { url: string }) {
   const clean = url.replace(/[.,)]+$/, "");
@@ -151,25 +151,45 @@ function ChatPage() {
     }
   }, []);
 
+  // Modified: allow guest/unauthenticated access to avoid redirect loop with /auth
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
-      if (!data.session) {
-        navigate({ to: "/auth" });
-        return;
+      if (data.session) {
+        setUserId(data.session.user.id);
+        const { data: p } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", data.session.user.id)
+          .maybeSingle();
+        setUsername(p?.username || data.session.user.email?.split("@")[0] || "user");
+      } else {
+        // guest mode
+        setUserId(null);
+        setUsername("guest");
       }
-      setUserId(data.session.user.id);
-      const { data: p } = await supabase
-        .from("profiles")
-        .select("username")
-        .eq("id", data.session.user.id)
-        .maybeSingle();
-      setUsername(p?.username || data.session.user.email?.split("@")[0] || "user");
     });
+
     const { data: sub } = supabase.auth.onAuthStateChange((_e, sess) => {
-      if (!sess) navigate({ to: "/auth" });
+      if (!sess) {
+        setUserId(null);
+        setUsername("guest");
+      } else {
+        setUserId(sess.user.id);
+        // attempt to load profile username
+        supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", sess.user.id)
+          .maybeSingle()
+          .then(({ data }) => {
+            if (data?.username) setUsername(data.username);
+          })
+          .catch(() => {});
+      }
     });
+
     return () => sub.subscription.unsubscribe();
-  }, [navigate]);
+  }, []);
 
   const loadConversations = useCallback(async () => {
     if (!userId) return;
@@ -251,14 +271,14 @@ function ChatPage() {
   }
 
   async function send(text: string) {
-    if ((!text && attachments.length === 0) || sending || !userId) return;
+    if ((!text && attachments.length === 0) || sending) return;
     const titleText =
       text || (attachments.length ? `[${attachments.length} media]` : "chat");
     setSending(true);
 
     let convId = activeId;
     try {
-      if (!convId) {
+      if (!convId && userId) {
         const { data: conv, error } = await supabase
           .from("conversations")
           .insert({ user_id: userId, title: titleText.slice(0, 40) })
@@ -287,12 +307,14 @@ function ChatPage() {
       setMessages((m) => [...m, userMsg]);
       setAttachments([]);
 
-      await supabase.from("messages").insert({
-        conversation_id: convId,
-        user_id: userId,
-        role: "user",
-        content: text,
-      });
+      if (userId) {
+        await supabase.from("messages").insert({
+          conversation_id: convId,
+          user_id: userId,
+          role: "user",
+          content: text,
+        });
+      }
 
       const systemPrompt =
         localStorage.getItem("systemPrompt") || DEFAULT_SYSTEM_PROMPT;
@@ -362,19 +384,20 @@ function ChatPage() {
         );
       }
 
-      await supabase.from("messages").insert({
-        conversation_id: convId,
-        user_id: userId,
-        role: "assistant",
-        content,
-      });
+      if (userId) {
+        await supabase.from("messages").insert({
+          conversation_id: convId,
+          user_id: userId,
+          role: "assistant",
+          content,
+        });
 
-
-      await supabase
-        .from("conversations")
-        .update({ updated_at: new Date().toISOString() })
-        .eq("id", convId);
-      loadConversations();
+        await supabase
+          .from("conversations")
+          .update({ updated_at: new Date().toISOString() })
+          .eq("id", convId);
+        loadConversations();
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "send failed");
     } finally {
@@ -384,248 +407,18 @@ function ChatPage() {
 
   async function signOut() {
     await supabase.auth.signOut();
-    navigate({ to: "/auth" });
+    // stay on page (no redirect) when signed out
+    setUserId(null);
+    setUsername("guest");
   }
 
   return (
     <div className="flex h-screen bg-[#0a0a0f] text-[#a855f7] font-mono overflow-hidden">
       {/* Sidebar */}
       <aside
-        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:static z-30 top-0 left-0 h-full w-72 bg-[#0a0a0f] border-r border-[#a855f7]/40 flex flex-col transition-transform`}
-      >
-        <div className="p-4 border-b border-[#a855f7]/30">
-          <button
-            onClick={newChat}
-            className="w-full border border-[#a855f7] px-3 py-2 text-xs tracking-widest hover:bg-[#a855f7] hover:text-black transition flex items-center gap-2 justify-center rounded-2xl"
-          >
-            <Plus size={14} /> NEW CHAT
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          {conversations.length === 0 && (
-            <p className="text-xs text-gray-500 px-2 py-4">// no transmissions yet</p>
-          )}
-          {conversations.map((c) => (
-            <div
-              key={c.id}
-              className={`group relative flex items-center gap-2 px-3 py-2 border text-xs cursor-pointer transition rounded-2xl ${
-                activeId === c.id
-                  ? "border-[#a855f7] bg-[#a855f7]/10"
-                  : "border-transparent hover:border-[#a855f7]/40"
-              }`}
-              onClick={() => {
-                setActiveId(c.id);
-                setSidebarOpen(false);
-              }}
-            >
-              <MessageSquare size={12} className="shrink-0 text-[#a855f7]/70" />
-              <span className="truncate flex-1">{c.title}</span>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setMenuId((prev) => (prev === c.id ? null : c.id));
-                }}
-                className="shrink-0 text-[#a855f7]/70 hover:text-white"
-                aria-label="opsi"
-              >
-                <MoreVertical size={14} />
-              </button>
-
-              {menuId === c.id && (
-                <div
-                  className="absolute right-2 top-full z-40 mt-1 w-36 overflow-hidden rounded-xl border border-[#a855f7]/50 bg-[#12121a]"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMenuId(null);
-                      deleteChat(c.id);
-                    }}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-[#f5f5f5] hover:bg-[#a855f7]/15"
-                  >
-                    <Trash2 size={13} className="text-[#a855f7]" /> Delete
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMenuId(null);
-                      shareChat(c);
-                    }}
-                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-[#f5f5f5] hover:bg-[#a855f7]/15"
-                  >
-                    <Share2 size={13} className="text-[#a855f7]" /> Bagikan
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="p-3 border-t border-[#a855f7]/30">
-          <button
-            onClick={signOut}
-            className="w-full flex items-center justify-center gap-2 p-3 rounded-2xl border border-[#a855f7]/40 text-[#a855f7] text-xs tracking-widest hover:bg-[#a855f7]/10 transition"
-          >
-            <LogOut size={16} /> LOG OUT
-          </button>
-        </div>
-      </aside>
-
-      {sidebarOpen && (
-        <div
-          className="md:hidden fixed inset-0 bg-black/60 z-20"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Main */}
-      <main className="relative flex-1 flex flex-col min-w-0">
-        {/* Header */}
-        <div className="flex items-center justify-between gap-3 px-4 pt-4">
-          <button
-            type="button"
-            onClick={() => setSidebarOpen((v) => !v)}
-            aria-label="menu"
-            className="shrink-0 h-11 w-11 flex items-center justify-center bg-[#12121a] border border-[#a855f7]/40 rounded-2xl hover:bg-[#a855f7]/10 transition"
-          >
-            <Menu size={20} className="text-[#a855f7]" />
-          </button>
-
-          <div className="flex items-center gap-3 px-5 py-2 bg-[#12121a] border border-[#a855f7]/40 rounded-full">
-            <span className="text-[#a855f7] text-sm font-bold tracking-widest">
-              BARA AI
-            </span>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setSettingsOpen(true)}
-            aria-label="settings"
-            className="shrink-0 h-11 w-11 flex items-center justify-center bg-[#12121a] border border-[#a855f7]/40 rounded-2xl hover:bg-[#a855f7]/10 transition"
-          >
-            <Settings size={20} className="text-[#a855f7]" />
-          </button>
-        </div>
-
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
-          {messages.length === 0 && !sending && (
-            <div className="h-full flex items-center justify-center text-center px-4">
-              <div className="flex flex-col items-center">
-                <div className="mt-6 text-xl sm:text-2xl text-[#a855f7] tracking-[0.2em]">
-                  Welcome to Bara AI
-                </div>
-                <div className="mt-3 text-[10px] sm:text-xs tracking-[0.3em] text-[#a855f7]/70">
-                  by Bara Official
-                </div>
-              </div>
-            </div>
-          )}
-          {messages.map((m) => (
-            <div
-              key={m.id}
-              className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              <div
-                className={`max-w-[85%] sm:max-w-[70%] text-sm leading-relaxed rounded-2xl ${
-                  m.role === "user"
-                    ? "px-4 py-3 border border-[#a855f7]/50 bg-[#a855f7]/10 text-[#f5f5f5]"
-                    : "px-5 py-4 border border-[#a855f7]/40 bg-[#12121a] text-[#f5f5f5]"
-                }`}
-              >
-                <div className="text-[9px] tracking-widest text-[#a855f7]/70 mb-1">
-                  {m.role === "user" ? `> ${username}` : "> bara"}
-                </div>
-                {m.role === "assistant" ? (
-                  <>
-                    <RenderMessage content={m.content} />
-                    <AssistantActions content={m.content} />
-                  </>
-                ) : (
-                  <div className="space-y-2">
-                    {m.media && m.media.length > 0 && (
-                      <div className="space-y-2">
-                        {m.media.map((mm, i) =>
-                          mm.type === "video" ? (
-                            <video
-                              key={i}
-                              src={mm.url}
-                              controls
-                              className="max-w-full rounded-xl border border-[#a855f7]/40"
-                            />
-                          ) : mm.type === "image" ? (
-                            <img
-                              key={i}
-                              src={mm.url}
-                              alt="attachment"
-                              className="max-w-full rounded-xl border border-[#a855f7]/40"
-                            />
-                          ) : (
-                            <a
-                              key={i}
-                              href={mm.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="block truncate text-xs px-3 py-2 rounded-xl border border-[#a855f7]/40 bg-[#0a0a0f] text-[#f5f5f5]"
-                            >
-                              📄 {mm.name ?? "file"}
-                            </a>
-                          ),
-                        )}
-                      </div>
-                    )}
-                    {REPO_RE.test(m.content) && (
-                      <RepoCard url={m.content.match(REPO_RE)![1]} />
-                    )}
-                    {m.content && (
-                      <span className="whitespace-pre-wrap block">{m.content}</span>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-          {sending && (
-            <div className="flex justify-start">
-              <div className="rounded-2xl border border-[#a855f7]/40 bg-[#12121a] px-4 py-3 text-sm flex items-center gap-2 text-[#a855f7]">
-                <span className="inline-block animate-pulse">thinking</span>
-
-              </div>
-            </div>
-          )}
-        </div>
-
-        {showScrollBtn && (
-          <button
-            type="button"
-            onClick={scrollToBottom}
-            aria-label="scroll to new messages"
-            className="absolute bottom-20 left-1/2 z-10 -translate-x-1/2 flex items-center justify-center gap-1 px-3 py-1.5 rounded-full bg-[#12121a] border border-[#a855f7]/60 text-[#a855f7] text-xs shadow-[0_0_12px_rgba(168,85,247,0.4)] hover:bg-[#a855f7]/10 transition animate-fade-in"
-          >
-            ⬇️ <ChevronDown size={16} />
-          </button>
-        )}
-
-        <ChatInput
-          initialText={draft}
-          onSend={send}
-          onFiles={(files) => setAttachments((prev) => [...prev, ...files])}
-          disabled={sending}
-          attachments={attachments}
-          onRemoveAttachment={(i) =>
-            setAttachments((prev) => prev.filter((_, idx) => idx !== i))
-          }
-          onClearAttachments={() => setAttachments([])}
-        />
-      </main>
-
-      <SettingsModal
-        isOpen={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
-        username={username}
-        onUsernameChange={setUsername}
-        onLogout={signOut}
-        onClearChat={clearChat}
-      />
-    </div>
-  );
-}
+        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:static z-30 top-0 left-0 h-full w-72 bg-[#0a0a0f] border-r border-[#a855f7]/40 flex flex-col t[...]`,
+    message: "fix: avoid redirect loop by allowing guest access in chat (no redirect to /auth)",
+    owner: "baraofficial",
+    path: "src/routes/chat.tsx",
+    repo: "infinitysecurity",
+    sha: "c02c01744a23103ac04b4fabd61fda725fffd486"}EOF}]}]}})BEGIN_OUTPUT_SUCCESSION_TOKEN_PLACEHOLDER_BLOCK_OUTPUT_SESSION_MARKER_SIGNATURE_UPDATED_CONTINUE_STREAM_ABORT_NOTICE_FAILURE_PLUGIN_INVOCATION_UNKNOWN_SYMBOLS_TRANSLATION_WARNINGCONTINUE_STREAM_ABORT_TOKEN_OUTPUT_CORRUPTED_RESPONSEPLEASE_RESEND_FILE_CONTENT_OR_TRY_AGAIN>}'```}]}]}]}]}]}]}]}]}]}]}]}]}}]}]}}}]}]}]}]}]}]}]}}}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}]}}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}]}}]}

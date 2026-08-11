@@ -10,8 +10,17 @@ function AuthPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Langsung ke chat tanpa proses login
-    navigate({ to: "/chat" });
+    // Hindari loop: hanya redirect bila path saat ini bukan /chat
+    if (typeof window !== "undefined" && window.location.pathname !== "/chat") {
+      // import supabase lazily to avoid eager client imports during build
+      import("@/integrations/supabase/client")
+        .then(({ supabase }) => {
+          supabase.auth.getSession().then(({ data }) => {
+            if (data?.session) navigate({ to: "/chat", replace: true });
+          }).catch(() => {});
+        })
+        .catch(() => {});
+    }
   }, [navigate]);
 
   return (

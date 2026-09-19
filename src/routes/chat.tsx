@@ -37,8 +37,7 @@ type Message = {
 const DEFAULT_SYSTEM_PROMPT =
   "Kamu adalah Bara AI, asisten AI yang cerdas, membantu, dan ramah.";
 
-const REPO_RE = /(https?:\/\/github\.com\/[^
-\s]+)/i;
+const REPO_RE = /(https?:\/\/github\.com\/[^\s]+)/i;
 
 function RepoCard({ url }: { url: string }) {
   const clean = url.replace(/[.,)]+$/, "");

@@ -37,8 +37,7 @@ type Message = {
 const DEFAULT_SYSTEM_PROMPT =
   "Kamu adalah Bara AI, asisten AI yang cerdas, membantu, dan ramah.";
 
-const REPO_RE = /(https?:\/\/github\.com\/[^
-\s]+)/i;
+const REPO_RE = /(https?:\/\/github\.com\/[^\s]+)/i;
 
 function RepoCard({ url }: { url: string }) {
   const clean = url.replace(/[.,)]+$/, "");
@@ -401,6 +400,237 @@ function ChatPage() {
     <div className="flex h-screen bg-[#0a0a0f] text-[#a855f7] font-mono overflow-hidden">
       {/* Sidebar */}
       <aside
-        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:static z-30 top-0 left-0 h-full w-72 bg-[#0a0a0f] border-r border-[#a855f7]/40 flex flex-col t[...]
+        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 fixed md:static z-30 top-0 left-0 h-full w-72 bg-[#0a0a0f] border-r border-[#a855f7]/40 flex flex-col transition-transform duration-300`}
+      >
+        <div className="p-4">
+          <button
+            onClick={newChat}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#a855f7]/50 px-4 py-3 text-sm hover:bg-[#a855f7]/10 transition"
+          >
+            <Plus size={16} /> NEW CHAT
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-3 pb-3 space-y-1">
+          {conversations.map((c) => (
+            <div
+              key={c.id}
+              className={`group relative flex items-center gap-2 rounded-2xl px-3 py-2.5 cursor-pointer transition ${
+                activeId === c.id
+                  ? "bg-[#a855f7]/15 border border-[#a855f7]/40"
+                  : "hover:bg-[#a855f7]/5 border border-transparent"
+              }`}
+              onClick={() => {
+                setActiveId(c.id);
+                setSidebarOpen(false);
+              }}
+            >
+              <MessageSquare size={14} className="shrink-0 text-[#a855f7]/60" />
+              <span className="flex-1 truncate text-xs text-[#f5f5f5]">
+                {c.title}
+              </span>
+              <button
+                type="button"
+                aria-label="opsi"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuId(menuId === c.id ? null : c.id);
+                }}
+                className="shrink-0 text-[#a855f7]/60 hover:text-white p-1"
+              >
+                <MoreVertical size={14} />
+              </button>
+              {menuId === c.id && (
+                <div
+                  className="absolute right-2 top-full z-40 mt-1 w-32 rounded-xl border border-[#a855f7]/40 bg-[#12121a] py-1 shadow-lg"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    onClick={() => {
+                      setMenuId(null);
+                      shareChat(c);
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-xs text-[#a855f7] hover:bg-[#a855f7]/10"
+                  >
+                    <Share2 size={13} /> Bagikan
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMenuId(null);
+                      deleteChat(c.id);
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-xs text-[#ef4444] hover:bg-[#ef4444]/10"
+                  >
+                    <Trash2 size={13} /> Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="border-t border-[#a855f7]/30 p-3 space-y-1">
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="flex w-full items-center gap-2 rounded-2xl px-3 py-2.5 text-xs hover:bg-[#a855f7]/10 transition"
+          >
+            <Settings size={15} /> Setting
+          </button>
+          <button
+            onClick={signOut}
+            className="flex w-full items-center gap-2 rounded-2xl px-3 py-2.5 text-xs text-[#a855f7]/70 hover:bg-[#a855f7]/10 transition"
+          >
+            <LogOut size={15} /> {username || "user"}
+          </button>
+        </div>
+      </aside>
+
+      {/* Overlay for mobile sidebar */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-20 bg-black/60 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Main */}
+      <main className="flex-1 flex flex-col min-w-0">
+        {/* Header */}
+        <header className="flex items-center gap-6 border-b border-[#a855f7]/30 px-4 py-3">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            aria-label="menu"
+            className="md:hidden flex h-9 w-9 items-center justify-center rounded-xl border border-[#a855f7]/50"
+          >
+            <Menu size={16} />
+          </button>
+          <div className="inline-flex items-center rounded-full border border-[#a855f7]/50 px-4 py-1.5 overflow-hidden max-w-full">
+            <span className="whitespace-nowrap text-xs font-bold tracking-[0.25em] animate-marquee">
+              BARA AI V 24.08 by Bara Official&nbsp;&nbsp;&nbsp;BARA AI V 24.08
+              by Bara Official&nbsp;&nbsp;&nbsp;
+            </span>
+          </div>
+        </header>
+
+        {/* Messages */}
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-6 relative">
+          {messages.length === 0 ? (
+            <div className="flex h-full flex-col items-center justify-center text-center">
+              <p className="text-lg font-bold tracking-[0.3em]">BARA AI</p>
+              <p className="mt-2 text-[11px] text-[#a855f7]/60">
+                by Bara Official
+              </p>
+              <p className="mt-4 text-xs text-[#71717a]">
+                Mulai percakapan baru di bawah.
+              </p>
+            </div>
+          ) : (
+            <div className="mx-auto max-w-3xl space-y-4">
+              {messages.map((m) => (
+                <div
+                  key={m.id}
+                  className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={
+                      m.role === "user"
+                        ? "max-w-[85%] bg-[#a855f7]/15 border border-[#a855f7]/40 px-4 py-3 text-sm text-[#f5f5f5]"
+                        : "max-w-[85%] rounded-[20px] border border-[#8B5CF6] bg-transparent px-5 py-4 text-sm text-[#a855f7]"
+                    }
+                  >
+                    {m.media && m.media.length > 0 && (
+                      <div className="mb-2 flex flex-wrap gap-2">
+                        {m.media.map((med, i) =>
+                          med.type === "image" ? (
+                            <img
+                              key={i}
+                              src={med.url}
+                              alt={med.name || "gambar"}
+                              className="max-h-48 rounded-lg border border-[#a855f7]/40"
+                            />
+                          ) : med.type === "video" ? (
+                            <video
+                              key={i}
+                              src={med.url}
+                              controls
+                              className="max-h-48 rounded-lg border border-[#a855f7]/40"
+                            />
+                          ) : (
+                            <span
+                              key={i}
+                              className="rounded-lg border border-[#a855f7]/40 px-2 py-1 text-[10px]"
+                            >
+                              {med.name || "file"}
+                            </span>
+                          ),
+                        )}
+                      </div>
+                    )}
+                    {m.role === "assistant" ? (
+                      m.content ? (
+                        <>
+                          <RenderMessage content={m.content} />
+                          {REPO_RE.test(m.content) && (
+                            <div className="mt-2 space-y-2">
+                              {(m.content.match(REPO_RE) ?? []).map((u) => (
+                                <RepoCard key={u} url={u} />
+                              ))}
+                            </div>
+                          )}
+                          <AssistantActions content={m.content} />
+                        </>
+                      ) : (
+                        <span className="text-xs text-[#a855f7]/60">
+                          thinking
+                        </span>
+                      )
+                    ) : (
+                      <span className="whitespace-pre-wrap">{m.content}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Scroll-to-bottom button */}
+        {showScrollBtn && (
+          <button
+            onClick={scrollToBottom}
+            aria-label="ke bawah"
+            className="absolute bottom-28 left-1/2 z-10 -translate-x-1/2 flex h-9 w-9 items-center justify-center rounded-full border border-[#a855f7]/50 bg-[#12121a] text-[#a855f7] hover:bg-[#a855f7]/15 transition"
+          >
+            <ChevronDown size={16} />
+          </button>
+        )}
+
+        {/* Input */}
+        <div className="border-t border-[#a855f7]/30 p-3">
+          <div className="mx-auto max-w-3xl">
+            <ChatInput
+              onSend={send}
+              disabled={sending}
+              initialText={draft}
+              attachments={attachments}
+              onFiles={(files) => setAttachments((a) => [...a, ...files])}
+              onRemoveAttachment={(i) =>
+                setAttachments((a) => a.filter((_, idx) => idx !== i))
+              }
+              onClearAttachments={() => setAttachments([])}
+            />
+          </div>
+        </div>
+      </main>
+
+      <SettingsModal
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        username={username}
+        onUsernameChange={setUsername}
+        onLogout={signOut}
+        onClearChat={clearChat}
+      />
+    </div>
   );
 }

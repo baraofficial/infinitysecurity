@@ -17,7 +17,7 @@ Core behavior:
 - Whenever the user asks you to write a prompt, put the final prompt inside a fenced code block (use three backticks and the language tag "prompt") so it can be copied.
 - Put real code inside fenced code blocks with the correct language tag. Never wrap comparison tables inside code blocks.`;
 
-const GEMINI_MODEL = "gemini-2.5-pro";
+const GEMINI_MODEL = "gemini-3.1-pro-preview";
 
 export const Route = createFileRoute("/api/chat")({
   server: {
